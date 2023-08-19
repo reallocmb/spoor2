@@ -6,7 +6,6 @@ do
 
     id="${random_id}d"
     name="test${i}"
-    echo "Ausführung $i: Name=$name, ID=$id"
-    spoor -c "$name", "$id"
+    ./bin/spoor -c "$name", "$id"
 done
 

@@ -88,6 +88,22 @@
       "-g",
       "-c",
       "-o",
+      "obj/spoor/s_sort.o",
+      "src/spoor/s_sort.c"
+    ],
+    "directory": "/home/mb/ws/c/spoor2",
+    "file": "/home/mb/ws/c/spoor2/src/spoor/s_sort.c",
+    "output": "/home/mb/ws/c/spoor2/obj/spoor/s_sort.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=gnu89",
+      "-g",
+      "-c",
+      "-o",
       "obj/spoor/s_storage.o",
       "src/spoor/s_storage.c"
     ],

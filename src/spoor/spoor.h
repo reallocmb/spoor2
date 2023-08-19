@@ -1,6 +1,10 @@
 #ifndef SPOOR_H
 #define SPOOR_H
 
+#define SPOOR_VERSION_MAJOR 0
+#define SPOOR_VERSION_MINOR 0
+#define SPOOR_VERSION_PATCH 0
+
 typedef void SpoorObject;
 typedef void SpoorDatabase;
 typedef void SpoorFilter;
@@ -10,6 +14,8 @@ typedef void SpoorFilter;
 SpoorObject *spoor_arguments_parse(int argc, char **argv); /* parse the command arguments and create a new SpoorObject */
 uint32_t spoor_object_size(void);
 void spoor_object_progress_change(SpoorObject *spoor_object);
+char *spoor_object_argv_to_command(int argc, char **argv);
+SpoorObject *spoor_object_create(char *command);
 
 /* Data Storage */
 void spoor_storage_save(SpoorObject *spoor_object);

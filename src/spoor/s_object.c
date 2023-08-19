@@ -5,7 +5,6 @@
 #include<assert.h>
 #include<string.h>
 #include<time.h>
-#include<uuid/uuid.h>
 
 void spoortime_parse(char *argv, uint32_t argv_len, SpoorTime *spoor_time)
 {
@@ -115,6 +114,23 @@ void spoortime_parse(char *argv, uint32_t argv_len, SpoorTime *spoor_time)
     spoor_time->end.tm_min = minute;
 }
 
+char *spoor_object_argv_to_command(int argc, char **argv)
+{
+    /* create title */
+    if (argc < 1)
+        return NULL;
+
+    uint16_t i;
+    for (i = 0; i < argc - 1; i++)
+    {
+        uint32_t argv_len = strlen(argv[i]);
+
+        argv[i][argv_len] = ' ';
+    }
+
+    return argv[0];
+}
+
 /* title, d800 */
 SpoorObject *spoor_object_create(char *command)
 {
@@ -176,6 +192,7 @@ SpoorObject *spoor_object_create(char *command)
     return spoor_object;
 }
 
+#if 0
 SpoorObject *spoor_arguments_parse(uint16_t argc, char **argv)
 {
     SpoorObject *spoor_object = malloc(sizeof(*spoor_object));
@@ -237,6 +254,7 @@ SpoorObject *spoor_arguments_parse(uint16_t argc, char **argv)
 
     return spoor_object;
 }
+#endif
 
 uint32_t spoor_object_size(void)
 {
@@ -246,4 +264,15 @@ uint32_t spoor_object_size(void)
 void spoor_object_progress_change(SpoorObject *spoor_object, SpoorStatus status)
 {
     spoor_object->status = status;
+}
+
+void spoor_object_schedule_set(SpoorObject *spoor_object, char *command)
+{
+    if (command[0] == ' ')
+        command++;
+
+    if (command[0] == 'r')
+        spoor_object->schedule.start.tm_year = -1;
+    else
+        spoortime_parse(command, strlen(command), &spoor_object->schedule);
 }

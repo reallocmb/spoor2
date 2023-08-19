@@ -6,9 +6,9 @@ compiler = gcc $(develop_flags)
 
 version = gnu89
 
-release_flags = -std=$(version) -O3
-
+test_flags = -Wall -Wextra -std=$(version) -g -DTESTS
 develop_flags = -Wall -Wextra -std=$(version) -g
+release_flags = -std=$(version) -O3 -DRELEASE
 
 source_dir = src
 object_dir = obj
@@ -56,6 +56,9 @@ install_dir = /usr/bin
 install: compiler := gcc $(release_flags)
 install: clean all
 	sudo cp $(binary) $(install_dir)
+
+tests: compiler := gcc $(test_flags)
+tests: clean all run
 
 release: 
 	compiler = gcc $(release_flags)

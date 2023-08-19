@@ -15,7 +15,7 @@ typedef enum {
     TYPE_PROJECT,
     TYPE_EVENT,
     TYPE_APPOINTMENT,
-    TYPE_TARGET,
+    TYPE_GOAL,
     TYPE_HABIT,
 } SpoorType;
 
@@ -30,7 +30,7 @@ typedef struct {
     char id[100];
 } SpoorChild;
 
-#define SPOOR_OBJECT_DELETED_ID 9999
+#define SPOOR_OBJECT_DELETED_ID 0xffffffff
 
 typedef struct SpoorObject {
     uint32_t id;
@@ -63,5 +63,6 @@ void spoor_storage_save(SpoorObject *spoor_object);
 
 void spoor_storage_change(SpoorObject *spoor_object);
 void spoor_storage_delete(SpoorObject *spoor_object);
+void spoor_object_schedule_set(SpoorObject *spoor_object, char *command);
 
 #endif

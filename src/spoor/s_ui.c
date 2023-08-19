@@ -13,14 +13,14 @@ const char UI_TYPES[][17] = {
     "PROJECT",
     "EVENT",
     "APPOINTMENT",
-    "TARGET",
+    "GOAL",
     "HABIT",
 };
 
-const char UI_STATUS[][19] = {
-    "NOT STARTED",
-    "IN PROGRESS",
-    "COMPLETED",
+const char UI_STATUS[][50] = {
+    "\x1B[31mNOT STARTED\x1B[m",
+    "\x1B[33mIN PROGRESS\x1B[m",
+    "\x1B[32mCOMPLETED\x1B[m",
 };
 
 void screen_clear(void)
@@ -153,9 +153,9 @@ void spoor_ui_object_show(void)
         /* print title bar */
         cursor_move(0, 0);
         screen_clear();
-        fprintf(stdout, "%-30s%-18s%-24s%-13s%-13s%-12s%s", "TITLE", "DEADLINE", "SCHEDULE", "STATUS", "TYPE", "PROJECT", "I");
+        fprintf(stdout, "%-5s%-30s%-18s%-24s%-13s%-13s%-12s", "I", "TITLE", "DEADLINE", "SCHEDULE", "STATUS", "TYPE", "PROJECT");
         cursor_move(0, 2);
-        fprintf(stdout, "---------------------------------------------------------------------------------------------------------------");
+        fprintf(stdout, "--------------------------------------------------------------------------------------------------------------");
 
         /* print spoor_objects */
         char time_format_deadline[50];
@@ -168,14 +168,14 @@ void spoor_ui_object_show(void)
             time_format_parse_schedule(&spoor_objects[i + offset].schedule, time_format_schedule);
             cursor_move(0, 3 + i);
             fprintf(stdout,
-                    "%-30s%-18s%-24s%-13s%-13s%-12s%d",
+                    "%-5d%-30s%-18s%-24s%-21s%-13s%s",
+                    i,
                     spoor_objects[i + offset].title,
                     time_format_deadline,
                     time_format_schedule,
                     UI_STATUS[spoor_objects[i + offset].status],
                     UI_TYPES[spoor_objects[i + offset].type],
-                    spoor_objects[i + offset].parent_title,
-                    i);
+                    spoor_objects[i + offset].parent_title);
         }
 
         /* print status bar */
@@ -202,40 +202,68 @@ void spoor_ui_object_show(void)
                     spoor_storage_save(spoor_object);
                     spoor_objects_count = spoor_object_storage_load(spoor_objects);
                 }
-                else if (strncmp(command_buffer + 1, "d", 1) == 0)
+                else
                 {
                     uint32_t index = 0;
                     uint32_t p = 0;
-                    while (command_buffer[2 + p] >= 0x30 && command_buffer[2 + p] <= 0x39)
+                    while (command_buffer[1 + p] >= 0x30 && command_buffer[1 + p] <= 0x39)
                     {
                         index *= 10;
-                        index += command_buffer[2 + p] - 0x30;
+                        index += command_buffer[1 + p] - 0x30;
                         p++;
                     }
 
-                    spoor_storage_delete(&spoor_objects[index + offset]);
-                    spoor_objects_count = spoor_object_storage_load(spoor_objects);
-                }
-                else if (strncmp(command_buffer + 1, "p", 1) == 0)
-                {
-                    uint32_t index = 0;
-                    uint32_t p = 0;
-                    while (command_buffer[2 + p] >= 0x30 && command_buffer[2 + p] <= 0x39)
+                    if (strncmp(command_buffer + 1 + p, "d", 1) == 0)
                     {
-                        index *= 10;
-                        index += command_buffer[2 + p] - 0x30;
-                        p++;
+                        spoor_storage_delete(&spoor_objects[index + offset]);
+                        spoor_objects_count = spoor_object_storage_load(spoor_objects);
                     }
-                    uint16_t status = 0;
-                    if (strncmp(command_buffer + 2 + p, "c", 1) == 0)
-                        status = STATUS_COMPLETED;
-                    else if (strncmp(command_buffer + 2 + p, "ip", 2) == 0)
-                        status = STATUS_IN_PROGRESS;
-                    else if (strncmp(command_buffer + 2 + p, "ns", 2) == 0)
-                        status = STATUS_NOT_STARTED;
+                    else if (strncmp(command_buffer + 1 + p, "p", 1) == 0)
+                    {
+                        uint16_t status = 0;
+                        uint16_t space = (command_buffer[2 + p] == ' ') ?1 :0;
+                        if (strncmp(command_buffer + 2 + p + space, "c", 1) == 0)
+                            status = STATUS_COMPLETED;
+                        else if (strncmp(command_buffer + 2 + p + space, "ip", 2) == 0)
+                            status = STATUS_IN_PROGRESS;
+                        else if (strncmp(command_buffer + 2 + p + space, "ns", 2) == 0)
+                            status = STATUS_NOT_STARTED;
 
-                    spoor_object_progress_change(&spoor_objects[index + offset], status);
-                    spoor_storage_change(&spoor_objects[index + offset]);
+                        spoor_object_progress_change(&spoor_objects[index + offset], status);
+                        spoor_storage_change(&spoor_objects[index + offset]);
+                    }
+                    else if (strncmp(command_buffer + 1 + p, "s", 1) == 0)
+                    {
+                        spoor_object_schedule_set(&spoor_objects[index + offset], command_buffer + 2 + p);
+                        spoor_storage_change(&spoor_objects[index + offset]);
+                    }
+                    else if (strncmp(command_buffer + 1 + p, "t", 1) == 0)
+                    {
+                        uint16_t type = 0;
+                        uint16_t space = (command_buffer[2 + p] == ' ') ?1 :0;
+                        if (strncmp(command_buffer + 2 + p + space, "t", 1) == 0)
+                            type = TYPE_TASK;
+                        else if (strncmp(command_buffer + 2 + p + space, "p", 2) == 0)
+                            type = TYPE_PROJECT;
+                        else if (strncmp(command_buffer + 2 + p + space, "e", 2) == 0)
+                            type = TYPE_EVENT;
+                        else if (strncmp(command_buffer + 2 + p + space, "a", 2) == 0)
+                            type = TYPE_APPOINTMENT;
+                        else if (strncmp(command_buffer + 2 + p + space, "g", 2) == 0)
+                            type = TYPE_GOAL;
+                        else if (strncmp(command_buffer + 2 + p + space, "h", 2) == 0)
+                            type = TYPE_HABIT;
+
+                        spoor_objects[index + offset].type = type;
+                        spoor_storage_change(&spoor_objects[index + offset]);
+                    }
+                    else
+                    {
+                        screen_clear();
+                        cursor_move(0, 0);
+                        spoor_debug_spoor_object_print(&spoor_objects[index + offset]);
+                        getchar();
+                    }
                 }
                 memset(command_buffer, 0, 200);
                 command_mode = false;
@@ -256,7 +284,10 @@ void spoor_ui_object_show(void)
             if (c == 'f')
                 offset += (window_rows - 4) / 2;
             if (c == 'b')
-                offset -= (window_rows - 4) / 2;
+            {
+                if (((int64_t)offset - (window_rows - 4) / 2) >= 0)
+                    offset -= (window_rows - 4) / 2;
+            }
 
             if (c == 'q')
             {
