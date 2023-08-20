@@ -14,6 +14,7 @@ void spoortime_parse(char *argv, uint32_t argv_len, SpoorTime *spoor_time)
     int minute = 0;
     int sign = 1;
 
+
     /* count */
     uint32_t j = 0;
 
@@ -131,6 +132,25 @@ char *spoor_object_argv_to_command(int argc, char **argv)
     return argv[0];
 }
 
+uint32_t command_arg_next(char **command, uint32_t last_len)
+{
+    *command += last_len;
+    if ((*command)[0] == ' ')
+        (*command)++;
+
+    if ((*command)[0] == 0)
+        return 0;
+
+    uint32_t i;
+    for (i = 0; (*command)[i] != ' '; i++)
+    {
+        if ((*command)[i] == 0)
+            return i;
+    }
+
+    return i;
+}
+
 /* title, d800 */
 SpoorObject *spoor_object_create(char *command)
 {
@@ -151,31 +171,48 @@ SpoorObject *spoor_object_create(char *command)
     spoor_object->title[i] = 0;
     i++;
 
-    /* create time arguments */
-    uint32_t time_len = 0;
-    if (command[i] == ' ')
-        i++;
+    command += i;
 
-    if (command[i] != 0)
-    {
-        char *empty = strchr(command + i, ' ');
-        if (empty)
-        {
-            *empty = 0;
-            time_len = strlen(command + i);
-            *empty = ' ';
-        }
-        else
-            time_len = strlen(command + i);
+    /* create time arguments & type & status */
+    uint32_t len = 0;
 
-        spoortime_parse(command + i, time_len, &spoor_object->deadline);
-    }
-    else
-        spoor_object->deadline.start.tm_year = -1;
+    uint16_t status = STATUS_NOT_STARTED; 
+    uint16_t type = TYPE_EVENT;
+
+    spoor_object->deadline.start.tm_year = -1;
     spoor_object->schedule.start.tm_year = -1;
 
-    spoor_object->type = TYPE_EVENT;
-    spoor_object->status = STATUS_NOT_STARTED;
+    SpoorTime *ptr = &spoor_object->deadline;
+    
+    while ((len = command_arg_next(&command, len)) != 0)
+    {
+        if (strncmp(command, "t", 1) == 0)
+            type = TYPE_TASK;
+        else if (strncmp(command, "p", 1) == 0)
+            type = TYPE_PROJECT;
+        else if (strncmp(command, "e", 1) == 0)
+            type = TYPE_EVENT;
+        else if (strncmp(command, "a", 1) == 0)
+            type = TYPE_APPOINTMENT;
+        else if (strncmp(command, "g", 1) == 0)
+            type = TYPE_GOAL;
+        else if (strncmp(command, "h", 1) == 0)
+            type = TYPE_HABIT;
+        else if (strncmp(command, "c", 1) == 0)
+            status = STATUS_COMPLETED;
+        else if (strncmp(command, "ip", 2) == 0)
+            status = STATUS_IN_PROGRESS;
+        else if (strncmp(command, "ns", 2) == 0)
+            status = STATUS_NOT_STARTED;
+        else
+        {
+            spoortime_parse(command, len, ptr);
+            ptr = &spoor_object->schedule;
+        }
+    }
+
+    spoor_object->type = type;
+    spoor_object->status = status;
 
     /* create id */
     spoor_object->id = 0;
@@ -264,6 +301,17 @@ uint32_t spoor_object_size(void)
 void spoor_object_progress_change(SpoorObject *spoor_object, SpoorStatus status)
 {
     spoor_object->status = status;
+}
+
+void spoor_object_deadline_set(SpoorObject *spoor_object, char *command)
+{
+    if (command[0] == ' ')
+        command++;
+
+    if (command[0] == 'r')
+        spoor_object->deadline.start.tm_year = -1;
+    else
+        spoortime_parse(command, strlen(command), &spoor_object->deadline);
 }
 
 void spoor_object_schedule_set(SpoorObject *spoor_object, char *command)

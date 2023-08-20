@@ -77,8 +77,8 @@ void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format)
         return;
     }
 
-    char time_format_start[6];
-    char time_format_end[6];
+    char time_format_start[6] = { 0 };
+    char time_format_end[6] = { 0 };
 
     if (spoor_time->start.tm_hour == -1 || spoor_time->start.tm_min == -1)
         sprintf(time_format_start, "--:--");
@@ -94,7 +94,7 @@ void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format)
                 (spoor_time->end.tm_hour < 10) ?"0" :"", spoor_time->end.tm_hour,
                 (spoor_time->end.tm_min < 10) ?"0" : "", spoor_time->end.tm_min);
 
-    sprintf(time_format, "%s%d.%s%d.%d %s-%s",
+    sprintf(time_format, "%s%d.%s%d.%d %s %s",
             (spoor_time->start.tm_mday < 10) ?"0" :"",
             spoor_time->start.tm_mday,
             (spoor_time->start.tm_mon + 1 < 10) ?"0" :"",
@@ -158,8 +158,8 @@ void spoor_ui_object_show(void)
         fprintf(stdout, "--------------------------------------------------------------------------------------------------------------");
 
         /* print spoor_objects */
-        char time_format_deadline[50];
-        char time_format_schedule[50];
+        char time_format_deadline[50] = { 0 };
+        char time_format_schedule[50] = { 0 };
 
         uint32_t i;
         for (i = 0; i < spoor_objects_count && i < window_rows - 5; i++)
@@ -213,7 +213,12 @@ void spoor_ui_object_show(void)
                         p++;
                     }
 
-                    if (strncmp(command_buffer + 1 + p, "d", 1) == 0)
+                    if (strncmp(command_buffer + 1 + p, "dl", 2) == 0)
+                    {
+                        spoor_object_deadline_set(&spoor_objects[index + offset], command_buffer + 3 + p);
+                        spoor_storage_change(&spoor_objects[index + offset]);
+                    }
+                    else if (strncmp(command_buffer + 1 + p, "d", 1) == 0)
                     {
                         spoor_storage_delete(&spoor_objects[index + offset]);
                         spoor_objects_count = spoor_object_storage_load(spoor_objects);
@@ -243,15 +248,15 @@ void spoor_ui_object_show(void)
                         uint16_t space = (command_buffer[2 + p] == ' ') ?1 :0;
                         if (strncmp(command_buffer + 2 + p + space, "t", 1) == 0)
                             type = TYPE_TASK;
-                        else if (strncmp(command_buffer + 2 + p + space, "p", 2) == 0)
+                        else if (strncmp(command_buffer + 2 + p + space, "p", 1) == 0)
                             type = TYPE_PROJECT;
-                        else if (strncmp(command_buffer + 2 + p + space, "e", 2) == 0)
+                        else if (strncmp(command_buffer + 2 + p + space, "e", 1) == 0)
                             type = TYPE_EVENT;
-                        else if (strncmp(command_buffer + 2 + p + space, "a", 2) == 0)
+                        else if (strncmp(command_buffer + 2 + p + space, "a", 1) == 0)
                             type = TYPE_APPOINTMENT;
-                        else if (strncmp(command_buffer + 2 + p + space, "g", 2) == 0)
+                        else if (strncmp(command_buffer + 2 + p + space, "g", 1) == 0)
                             type = TYPE_GOAL;
-                        else if (strncmp(command_buffer + 2 + p + space, "h", 2) == 0)
+                        else if (strncmp(command_buffer + 2 + p + space, "h", 1) == 0)
                             type = TYPE_HABIT;
 
                         spoor_objects[index + offset].type = type;
