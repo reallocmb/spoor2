@@ -66,4 +66,6 @@ void spoor_storage_delete(SpoorObject *spoor_object);
 void spoor_object_schedule_set(SpoorObject *spoor_object, char *command);
 void spoor_object_deadline_set(SpoorObject *spoor_object, char *command);
 
+void spoor_storage_clean_up(void);
+
 #endif

@@ -101,3 +101,40 @@ void spoor_storage_delete(SpoorObject *spoor_object)
     redbas_db_change(db, spoor_object, sizeof(*spoor_object), db_id);
     redbas_db_close(db);
 }
+
+void spoor_storage_clean_up(void)
+{
+    DIR *dir = opendir(".");
+    struct dirent *ptr;
+    while ((ptr = readdir(dir)) != NULL)
+    {
+        if (strncmp(ptr->d_name + 6, ".rdb", 3) == 0)
+        {
+            SpoorObject spoor_object;
+            RedbasDB *db = redbas_db_open(ptr->d_name, sizeof(spoor_object));
+            RedbasDB *db_tmp = redbas_db_open(".tmp_db", sizeof(spoor_object));
+
+            uint32_t items = redbas_db_items(db);
+            uint32_t i;
+            uint32_t spoor_object_index;
+            for (i = 0, spoor_object_index = 0; i < items; i++)
+            {
+
+                redbas_db_restore_cursor_set(db, i);
+                redbas_db_restore(db, &spoor_object, sizeof(spoor_object));
+                if (spoor_object.id != SPOOR_OBJECT_DELETED_ID)
+                {
+                    spoor_object.id = spoor_object_index;
+                    redbas_db_store(db_tmp, &spoor_object, sizeof(spoor_object));
+                    spoor_object_index++;
+                }
+            }
+
+            redbas_db_close(db_tmp);
+            redbas_db_close(db);
+            rename(".tmp_db", ptr->d_name);
+        }
+    }
+
+    closedir(dir);
+}

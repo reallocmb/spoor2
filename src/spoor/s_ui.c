@@ -298,8 +298,8 @@ void spoor_ui_object_show(void)
             {
                 cursor_move(0, 0);
                 screen_clear();
-                /* todo clear the database */
-                /* like delete old id's and shrink it */
+
+                spoor_storage_clean_up();
 
                 break;
             }
