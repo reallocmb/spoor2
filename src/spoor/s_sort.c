@@ -1,6 +1,21 @@
 #include"spoor_internal.h"
 
-int spoor_time_compare(struct tm *time1, struct tm *time2)
+int64_t spoor_time_compare(struct tm *time1, struct tm *time2)
+{
+    return (time1->tm_year * 100000) +
+        (time1->tm_mon * 10000)+
+        (time1->tm_mday * 100) +
+        (time1->tm_hour * 10) +
+        time1->tm_min -
+        ((time2->tm_year * 100000) +
+        (time2->tm_mon * 10000) +
+        (time2->tm_mday * 100) +
+        (time2->tm_hour * 10) +
+        time2->tm_min);
+}
+
+#if 0
+int32_t spoor_time_compare(struct tm *time1, struct tm *time2)
 {
     if (time1->tm_year > time2->tm_year)
     {
@@ -45,6 +60,7 @@ int spoor_time_compare(struct tm *time1, struct tm *time2)
 
     return 0;
 }
+#endif
 
 void spoor_sort_objects(SpoorObject *spoor_objects, uint32_t spoor_objects_count)
 {

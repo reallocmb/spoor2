@@ -15,7 +15,7 @@ SpoorObject *spoor_arguments_parse(int argc, char **argv); /* parse the command 
 uint32_t spoor_object_size(void);
 void spoor_object_progress_change(SpoorObject *spoor_object);
 char *spoor_object_argv_to_command(int argc, char **argv);
-SpoorObject *spoor_object_create(char *command);
+SpoorObject *spoor_object_create(char *arguments);
 
 /* Data Storage */
 void spoor_storage_save(SpoorObject *spoor_object);
