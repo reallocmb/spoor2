@@ -40,30 +40,49 @@ void spoor_time_year_format(char *format_buffer, int year)
     }
 }
 
+void spoor_time_mon_format(char *format_buffer, int mon)
+{
+    if (mon == - 1)
+        sprintf(format_buffer, "--");
+    else
+    {
+        sprintf(format_buffer, "%s%d",
+                (mon < 10) ?"0" :"", mon + 1);
+    }
+}
+
 void debug_spoor_time_print(SpoorTime *spoor_time)
 {
-    char format_buffer_start[6];
-    char format_buffer_end[6];
-    char format_buffer_year[5];
+    char format_buffer_hour_min_start[6];
+    char format_buffer_hour_min_end[6];
+    char format_buffer_year_start[5];
+    char format_buffer_year_end[5];
+    char format_buffer_mon_start[3];
+    char format_buffer_mon_end[3];
+    char format_buffer_day_start[3];
+    char format_buffer_day_end[3];
 
-    spoor_time_hour_minute_format(format_buffer_start, &spoor_time->start);
-    spoor_time_hour_minute_format(format_buffer_end, &spoor_time->end);
+    spoor_time_hour_minute_format(format_buffer_hour_min_start, &spoor_time->start);
+    spoor_time_hour_minute_format(format_buffer_hour_min_end, &spoor_time->end);
 
-    spoor_time_year_format(format_buffer_year, spoor_time->start.tm_year);
+    spoor_time_year_format(format_buffer_year_start, spoor_time->start.tm_year);
+    spoor_time_year_format(format_buffer_year_end, spoor_time->end.tm_year);
 
-    printf("%s%d.%s%d.%s %s - %s%d.%s%d.%d %s\n",
-            (spoor_time->start.tm_mday < 10) ?"0" :"",
-            spoor_time->start.tm_mday,
-            (spoor_time->start.tm_mon + 1 < 10) ?"0" :"",
-            spoor_time->start.tm_mon + 1,
-            format_buffer_year,
-            format_buffer_start,
-            (spoor_time->end.tm_mday < 10) ?"0" :"",
-            spoor_time->end.tm_mday,
-            (spoor_time->end.tm_mon + 1 < 10) ?"0" :"",
-            spoor_time->end.tm_mon + 1,
-            spoor_time->end.tm_year + 1900,
-            format_buffer_end);
+    spoor_time_mon_format(format_buffer_mon_start, spoor_time->start.tm_mon);
+    spoor_time_mon_format(format_buffer_mon_end, spoor_time->end.tm_mon);
+
+    spoor_time_mon_format(format_buffer_day_start, spoor_time->start.tm_mday);
+    spoor_time_mon_format(format_buffer_day_end, spoor_time->end.tm_mday);
+
+    printf("%s.%s.%s %s - %s.%s.%s %s\n",
+            format_buffer_day_start,
+            format_buffer_mon_start,
+            format_buffer_year_start,
+            format_buffer_hour_min_start,
+            format_buffer_day_end,
+            format_buffer_mon_end,
+            format_buffer_year_end,
+            format_buffer_hour_min_end);
 }
 
 void spoor_debug_spoor_object_print(SpoorObject *spoor_object)
@@ -71,34 +90,11 @@ void spoor_debug_spoor_object_print(SpoorObject *spoor_object)
     printf("[ SpoorObject --\n");
     printf("%-20s%d\n", "Key:", spoor_object->id);
     printf("%-20s%s\n", "Title:", spoor_object->title);
-    printf("%-20s%i\n", "Status:", spoor_object->status);
+    printf("%-20s%s\n", "Status:", DEBUG_STATUS[spoor_object->status]);
     printf("%-20s", "Deadline: ");
     debug_spoor_time_print(&spoor_object->deadline);
-    printf("start: ");
-    printf("%-5i", spoor_object->deadline.start.tm_year); 
-    printf("%-5i", spoor_object->deadline.start.tm_mon); 
-    printf("%-5i", spoor_object->deadline.start.tm_mday); 
-    printf("%-5i", spoor_object->deadline.start.tm_hour); 
-    printf("%-5i", spoor_object->deadline.start.tm_min); 
-    printf("end: ");
-    printf("%-5i", spoor_object->deadline.end.tm_year); 
-    printf("%-5i", spoor_object->deadline.end.tm_mon); 
-    printf("%-5i", spoor_object->deadline.end.tm_mday); 
-    printf("%-5i", spoor_object->deadline.end.tm_hour); 
-    printf("%i\n", spoor_object->deadline.end.tm_min); 
     printf("%-20s", "Schedule: ");
     debug_spoor_time_print(&spoor_object->schedule);
-    printf("%-5i", spoor_object->schedule.start.tm_year); 
-    printf("%-5i", spoor_object->schedule.start.tm_mon); 
-    printf("%-5i", spoor_object->schedule.start.tm_mday); 
-    printf("%-5i", spoor_object->schedule.start.tm_hour); 
-    printf("%-5i", spoor_object->schedule.start.tm_min); 
-    printf("end: ");
-    printf("%-5i", spoor_object->schedule.end.tm_year); 
-    printf("%-5i", spoor_object->schedule.end.tm_mon); 
-    printf("%-5i", spoor_object->schedule.end.tm_mday); 
-    printf("%-5i", spoor_object->schedule.end.tm_hour); 
-    printf("%i\n", spoor_object->schedule.end.tm_min); 
     printf("%-20s", "Tracked: ");
     debug_spoor_time_print(&spoor_object->tracked);
     printf("%-20s", "Complete: ");

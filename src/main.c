@@ -42,35 +42,109 @@ int main(int argc, char **argv)
     return 0;
 }
 #else
+
+#include"unicki/unicki.h"
 #include"spoor/spoor_internal.h"
+#include<string.h>
 
-#include<stdio.h>
-
-int main(void)
+TEST_INIT
+TEST(suite, spoor_time_deadline_create())
 {
-    printf("Test Func: spoor_time_compare\n");
-    struct tm time1 = { .tm_year = 2023, .tm_mon = 0, .tm_mday = 0, .tm_hour = 0, .tm_min = 0 };
-    struct tm time2 = { .tm_year = 2024, .tm_mon = 11, .tm_mday = 30, .tm_hour = 23, .tm_min = 60 };
+    time_t current_time = time(NULL);
+    struct tm today = *localtime(&current_time);
 
-    int compare = spoor_time_compare(&time1, &time2);
+    SpoorTime spoor_time;
+    char argument[50];
+    strcpy(argument, "d");
+    spoor_time_deadline_create(argument, strlen(argument), &spoor_time);
+    unicki_assert(spoor_time.end.tm_year == today.tm_year);
+    unicki_assert(spoor_time.end.tm_mday == today.tm_mday);
+    unicki_assert(spoor_time.end.tm_mon == today.tm_mon);
+    unicki_assert(spoor_time.end.tm_hour == -1);
+    unicki_assert(spoor_time.end.tm_min == -1);
 
-    if (compare < 0)
-        printf("\t\x1B[32mTest Passed\x1B[m\n");
-    else
-        printf("\t\x1B[31mTest Falied\x1B[m\n");
+    unicki_assert(spoor_time.start.tm_year == -1);
+    unicki_assert(spoor_time.start.tm_mday == -1);
+    unicki_assert(spoor_time.start.tm_mon == -1);
+    unicki_assert(spoor_time.start.tm_hour == -1);
+    unicki_assert(spoor_time.start.tm_min == -1);
 
-    compare = spoor_time_compare(&time2, &time1);
+    strcpy(argument, "d-d");
+    spoor_time_deadline_create(argument, strlen(argument), &spoor_time);
+    unicki_assert(spoor_time.end.tm_year == today.tm_year);
+    unicki_assert(spoor_time.end.tm_mday == today.tm_mday);
+    unicki_assert(spoor_time.end.tm_mon == today.tm_mon);
+    unicki_assert(spoor_time.end.tm_hour == -1);
+    unicki_assert(spoor_time.end.tm_min == -1);
 
-    if (compare > 0)
-        printf("\t\x1B[32mTest Passed\x1B[m\n");
-    else
-        printf("\t\x1B[31mTest Falied\x1B[m\n");
+    unicki_assert(spoor_time.start.tm_year == today.tm_year);
+    unicki_assert(spoor_time.start.tm_mday == today.tm_mday);
+    unicki_assert(spoor_time.start.tm_mon == today.tm_mon);
+    unicki_assert(spoor_time.start.tm_hour == -1);
+    unicki_assert(spoor_time.start.tm_min == -1);
 
-    printf("Test Func: spoor_object_create\n");
+    strcpy(argument, "d915");
+    spoor_time_deadline_create(argument, strlen(argument), &spoor_time);
+    unicki_assert(spoor_time.end.tm_year == today.tm_year);
+    unicki_assert(spoor_time.end.tm_mday == today.tm_mday);
+    unicki_assert(spoor_time.end.tm_mon == today.tm_mon);
+    unicki_assert(spoor_time.end.tm_hour == 9);
+    unicki_assert(spoor_time.end.tm_min == 15);
 
-    free(spoor_object);
+    unicki_assert(spoor_time.start.tm_year == -1);
+    unicki_assert(spoor_time.start.tm_mday == -1);
+    unicki_assert(spoor_time.start.tm_mon == -1);
+    unicki_assert(spoor_time.start.tm_hour == -1);
+    unicki_assert(spoor_time.start.tm_min == -1);
 
+    strcpy(argument, "d915-d1948");
+    spoor_time_deadline_create(argument, strlen(argument), &spoor_time);
+    unicki_assert(spoor_time.end.tm_year == today.tm_year);
+    unicki_assert(spoor_time.end.tm_mday == today.tm_mday);
+    unicki_assert(spoor_time.end.tm_mon == today.tm_mon);
+    unicki_assert(spoor_time.end.tm_hour == 19);
+    unicki_assert(spoor_time.end.tm_min == 48);
 
-    return 0;
+    unicki_assert(spoor_time.start.tm_year == today.tm_year);
+    unicki_assert(spoor_time.start.tm_mday == today.tm_mday);
+    unicki_assert(spoor_time.start.tm_mon == today.tm_mon);
+    unicki_assert(spoor_time.start.tm_hour == 9);
+    unicki_assert(spoor_time.start.tm_min == 15);
+
+    strcpy(argument, "5d");
+    current_time += 5 * 60 * 60 * 24;
+    today = *localtime(&current_time);
+    spoor_time_deadline_create(argument, strlen(argument), &spoor_time);
+    unicki_assert(spoor_time.end.tm_year == today.tm_year);
+    unicki_assert(spoor_time.end.tm_mday == today.tm_mday);
+    unicki_assert(spoor_time.end.tm_mon == today.tm_mon);
+    unicki_assert(spoor_time.end.tm_hour == -1);
+    unicki_assert(spoor_time.end.tm_min == -1);
+
+    unicki_assert(spoor_time.start.tm_year == -1);
+    unicki_assert(spoor_time.start.tm_mday == -1);
+    unicki_assert(spoor_time.start.tm_mon == -1);
+    unicki_assert(spoor_time.start.tm_hour == -1);
+    unicki_assert(spoor_time.start.tm_min == -1);
+
+    current_time = time(NULL);
+    strcpy(argument, "-5d");
+    current_time -= 5 * 60 * 60 * 24;
+    today = *localtime(&current_time);
+    spoor_time_deadline_create(argument, strlen(argument), &spoor_time);
+    unicki_assert(spoor_time.end.tm_year == today.tm_year);
+    unicki_assert(spoor_time.end.tm_mday == today.tm_mday);
+    unicki_assert(spoor_time.end.tm_mon == today.tm_mon);
+    unicki_assert(spoor_time.end.tm_hour == -1);
+    unicki_assert(spoor_time.end.tm_min == -1);
+
+    unicki_assert(spoor_time.start.tm_year == -1);
+    unicki_assert(spoor_time.start.tm_mday == -1);
+    unicki_assert(spoor_time.start.tm_mon == -1);
+    unicki_assert(spoor_time.start.tm_hour == -1);
+    unicki_assert(spoor_time.start.tm_min == -1);
 }
+TEST_END
+
+
 #endif

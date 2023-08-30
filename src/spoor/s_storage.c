@@ -100,7 +100,7 @@ uint32_t spoor_object_storage_load_filter_time_span(SpoorObject *spoor_objects, 
                     items_total--;
 
                 /* time span filter */
-                if (spoor_time_compare(&spoor_objects[items_total + i].deadline.start, &spoor_time_span->start) == 1 &&
+                if (spoor_time_compare(&spoor_objects[items_total + i].deadline.start, &spoor_time_span->start) == 1 ||
                     spoor_time_compare(&spoor_objects[items_total + i].deadline.start, &spoor_time_span->end) == -1)
                     items_total--;
             }

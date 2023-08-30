@@ -52,6 +52,7 @@ typedef struct {
 } SpoorSort;
 
 SpoorObject *spoor_object_create(char *arguments);
+void spoor_object_edit(SpoorObject * spoor_object, char *arguments);
 
 void mdb_func_error_check(int error, char *func_name, int line, char *file);
 void spoor_debug_spoor_object_print(SpoorObject *spoor_object);
@@ -74,5 +75,7 @@ void spoor_time_span_create(SpoorTime *spoor_time_span, char *command);
 
 /* sort */
 int64_t spoor_time_compare(struct tm *time1, struct tm *time2);
+
+void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time);
 
 #endif

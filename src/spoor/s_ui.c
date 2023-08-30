@@ -203,8 +203,22 @@ void spoor_ui_object_show(void)
                     free(spoor_object);
                     spoor_objects_count = spoor_object_storage_load(spoor_objects);
                 }
+                else if (arguments[1] == 'h')
+                {
+                    screen_clear();
+                    cursor_move(0, 0);
+                    FILE *f = fopen("page_help", "r");
+                    int c;
+                    while ((c = fgetc(f)) != EOF)
+                        fputc(c, stdout);
+                    fclose(f);
+                    getchar();
+                }
                 else
                 {
+                    /* edit spoor object */
+
+                    /* index */
                     uint32_t index = 0;
                     uint32_t p = 0;
                     while (arguments[1 + p] >= 0x30 && arguments[1 + p] <= 0x39)
@@ -213,7 +227,19 @@ void spoor_ui_object_show(void)
                         index += arguments[1 + p] - 0x30;
                         p++;
                     }
-
+                    if (arguments[p + 1] == 'e')
+                    {
+                        spoor_object_edit(&spoor_objects[index + offset], arguments + p + 2);
+                        spoor_storage_change(&spoor_objects[index + offset]);
+                    }
+                    else
+                    {
+                        screen_clear();
+                        cursor_move(0, 0);
+                        spoor_debug_spoor_object_print(&spoor_objects[index + offset]);
+                        getchar();
+                    }
+#if 0
                     if (strncmp(arguments + 1 + p, "dl", 2) == 0)
                     {
                         spoor_object_deadline_set(&spoor_objects[index + offset], arguments + 3 + p);
@@ -277,6 +303,7 @@ void spoor_ui_object_show(void)
                         spoor_debug_spoor_object_print(&spoor_objects[index + offset]);
                         getchar();
                     }
+#endif
                 }
                 memset(arguments, 0, 200);
                 command_mode = false;

@@ -4,7 +4,7 @@ extern_lib =
 
 compiler = gcc $(develop_flags)
 
-version = gnu89
+version = gnu99
 
 test_flags = -Wall -Wextra -std=$(version) -g -DTESTS
 develop_flags = -Wall -Wextra -std=$(version) -g
