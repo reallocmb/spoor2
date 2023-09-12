@@ -6,7 +6,7 @@ compiler = gcc $(develop_flags)
 
 version = gnu99
 
-test_flags = -Wall -Wextra -std=$(version) -g -DTESTS
+test_flags = -Wall -Wextra -std=$(version) -g
 develop_flags = -Wall -Wextra -std=$(version) -g
 release_flags = -std=$(version) -O3 -DRELEASE
 
@@ -65,3 +65,7 @@ release:
 
 remove:
 	sudo rm $(install_dir)/$(program)
+
+test: all
+	gcc -Isrc/spoor tests/test.c -o bin/test -leenheid
+	./bin/test

@@ -6,8 +6,10 @@
 #include<string.h>
 #include<time.h>
 
+/* Input [count]['d'][time] */
 void spoor_time_date_create(char *argument, uint32_t argument_length, struct tm *date)
 {
+    char last_char = argument[argument_length];
     argument[argument_length] = 0;
 
     /* d900-5d1000 */
@@ -54,10 +56,17 @@ void spoor_time_date_create(char *argument, uint32_t argument_length, struct tm 
 
         date->tm_hour = hour;
         date->tm_min = minute;
+
+        if (!(hour >= 0 && hour <= 23 && minute >= 0 && minute <= 60))
+        {
+            date->tm_hour = -1;
+            date->tm_min = -1;
+        }
+
         return;
     }
 
-    /* 700 */
+    /* hour & minute */
     if (argument[i] != 0)
     {
         while (argument[i] >= 0x30 && argument[i] <= 0x39)
@@ -79,9 +88,16 @@ void spoor_time_date_create(char *argument, uint32_t argument_length, struct tm 
         date->tm_min = -1;
     }
 
+    if (!(hour >= 0 && hour <= 23 && minute >= 0 && minute <= 60))
+    {
+        date->tm_hour = -1;
+        date->tm_min = -1;
+    }
+
+    argument[argument_length] = last_char;
 }
 
-void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time)
+void spoor_time_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time)
 {
     char last_c = argument[argument_length];
     argument[argument_length] = 0;
@@ -100,373 +116,6 @@ void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorT
     }
 
     argument[argument_length] = last_c;
-    
-#if 0
-    argument[argument_length] = 0;
-
-    /* d900-5d1000 */
-    uint32_t count = 0;
-    char mode = 0;
-    int32_t hour = 0;
-    int32_t minute = 0;
-    int8_t sign = 1;
-    /* count */
-    uint32_t i = 0;
-
-    /* count minus */
-    if (argument[0] == '-')
-    {
-        sign = -1;
-        i++;
-    }
-
-    while (argument[i] >= 0x30 && argument[i] <= 0x39)
-    {
-        count *= 10;
-        count += argument[i] - 0x30;
-        i++;
-    }
-
-    /* mode */
-    mode = argument[i];
-    i++;
-
-    /* end time */
-    time_t current_time;
-    current_time = time(NULL);
-
-    if (mode == 'd')
-    {
-        current_time += sign * 60 * 60 * 24 * (int32_t)count;
-    }
-
-    spoor_time->end = *localtime(&current_time);
-
-    /* 700 */
-    if (argument[i] != '-' && argument[i] != 0)
-    {
-        while (argument[i] >= 0x30 && argument[i] <= 0x39)
-        {
-            minute *= 10;
-            minute += argument[i] - 0x30;
-            i++;
-        }
-
-        hour = minute / 100;
-        minute = minute % 100;
-
-        spoor_time->end.tm_hour = hour;
-        spoor_time->end.tm_min = minute;
-    }
-    else
-    {
-        spoor_time->end.tm_hour = -1;
-        spoor_time->end.tm_min = -1;
-    }
-
-    /* -d900 */
-    if (argument[i] == '-')
-    {
-        i++;
-        spoor_time->start = spoor_time->end;
-
-        /* count minus */
-        if (argument[i] == '-')
-        {
-            sign = -1;
-            i++;
-        }
-        sign = 1;
-
-        while (argument[i] >= 0x30 && argument[i] <= 0x39)
-        {
-            count *= 10;
-            count += argument[i] - 0x30;
-            i++;
-        }
-
-        /* mode */
-        mode = argument[i];
-        i++;
-
-        /* end time */
-        time_t current_time;
-        current_time = time(NULL);
-
-        if (mode == 'd')
-        {
-            current_time += sign * 60 * 60 * 24 * (int32_t)count;
-        }
-
-        spoor_time->end = *localtime(&current_time);
-
-        if (argument[i] == 0)
-        {
-            spoor_time->end.tm_hour = -1;
-            spoor_time->end.tm_min = -1;
-        }
-        else
-        {
-            while (argument[i] >= 0x30 && argument[i] <= 0x39)
-            {
-                minute *= 10;
-                minute += argument[i] - 0x30;
-                i++;
-            }
-
-            hour = minute / 100;
-            minute = minute % 100;
-
-            spoor_time->end.tm_hour = hour;
-            spoor_time->end.tm_min = minute;
-        }
-    }
-#endif
-
-#if 0
-    /* hour & minute */
-    if (argument[i] == 0)
-    {
-        spoor_time->end.tm_hour = -1;
-        spoor_time->end.tm_min = -1;
-    }
-    else if (argument[i] == '-')
-    {
-        spoor_time->start = spoor_time->end;
-        i++;
-        if (argument[i] == '-')
-        {
-            sign = -1;
-            i++;
-        }
-        else
-            sign = 0;
-
-        count = 0;
-        while (argument[i] >= 0x30 && argument[i] <= 0x39)
-        {
-            count *= 10;
-            count += argument[i] - 0x30;
-            i++;
-        }
-
-        mode = argument[i];
-        i++;
-        /* todo */
-        current_time = time(NULL);
-
-        if (mode == 'd')
-            current_time += count * 60 * 60 * 24 * sign;
-
-        spoor_time->end =  *localtime(&current_time);
-
-        if (argument[i] == 0)
-        {
-            spoor_time->end.tm_hour = -1;
-            spoor_time->end.tm_min = -1;
-        }
-        else
-        {
-            minute = 0;
-            while (argument[i] >= 0x30 && argument[i] <= 0x39)
-            { 
-                minute += 10;
-                minute += argument[i] - 0x30;
-                i++;
-            }
-
-            hour = minute / 100;
-            minute = minute % 100;
-
-            spoor_time->end.tm_hour = hour;
-            spoor_time->end.tm_min = minute;
-        }
-    }
-    else
-    {
-        while (argument[i] >= 0x30 && argument[i] <= 0x39)
-        {
-            minute *= 10;
-            minute += argument[i] - 0x30;
-            i++;
-        }
-
-        hour = minute / 100;
-        minute = minute % 100;
-
-        spoor_time->end.tm_hour = hour;
-        spoor_time->end.tm_min = minute;
-    }
-#endif
-
-}
-
-void spoor_time_deadline_create_old(char *argument, uint32_t argument_length, SpoorTime *spoor_time)
-{
-    uint32_t count = 0;
-    char mode = 0;
-    int32_t hour = 0;
-    int32_t minute = 0;
-    int32_t sign = 1;
-
-    /* count */
-    uint32_t i = 0;
-
-    if (argument[0] == '-')
-    {
-        sign = -1;
-        i++;
-    }
-
-    for (; i < argument_length; i++)
-    {
-        if (argument[i] >= 0x30 && argument[i] <= 0x39)
-        {
-            count *= 10;
-            count += argument[i] - 0x30;
-        }
-        else
-            break;
-    }
-
-    /* mode */
-    mode = argument[i];
-    i++;
-
-    /* time */
-    time_t current_time;
-    current_time = time(NULL);
-
-    if (mode == 'd')
-        current_time += count * 60 * 60 * 24 * sign;
-
-    if (mode == 'w')
-        current_time += count * 60 * 60 * 24 * 7 * sign;
-
-    spoor_time->end = *localtime(&current_time);
-    if (mode == 'm')
-    {
-        spoor_time->end.tm_mon += count * sign;
-        if (spoor_time->end.tm_mon <= -1)
-        {
-            spoor_time->end.tm_year -= (spoor_time->end.tm_mon * -1) /  12;
-            spoor_time->end.tm_mon -= (spoor_time->end.tm_mon * -1) % 12;
-        }
-
-        if (spoor_time->end.tm_mon >= 12)
-        {
-            spoor_time->end.tm_year += spoor_time->end.tm_mon / 12;
-            spoor_time->end.tm_mon += spoor_time->end.tm_mon % 12;
-        }
-    }
-
-    /* hour minute */
-    if (i < argument_length && argument[i] != '-')
-    {
-        for (; i < argument_length; i++)
-        {
-            if (argument[i] >= 0x30 && argument[i] <= 0x39)
-            {
-                minute *= 10;
-                minute += argument[i] - 0x30;
-            }
-            else
-                break;
-        }
-
-        hour = minute / 100;
-        minute = minute % 100;
-    }
-    else
-    {
-        hour = -1;
-        minute = -1;
-    }
-
-    spoor_time->end.tm_hour = hour;
-    spoor_time->end.tm_min = minute;
-
-    spoor_time->start = spoor_time->end;
-    /* spoor time end */
-    if (argument[i] == '-')
-    {
-        i++;
-        /* count */
-        if (argument[i] == '-')
-        {
-            sign = -1;
-            i++;
-        }
-        else
-            sign = 1;
-
-        for (; i < argument_length; i++)
-        {
-            if (argument[i] >= 0x30 && argument[i] <= 0x39)
-            {
-                count *= 10;
-                count += argument[i] - 0x30;
-            }
-            else
-                break;
-        }
-
-        /* mode */
-        mode = argument[i];
-        i++;
-
-        /* time */
-        current_time = time(NULL);
-
-        if (mode == 'd')
-            current_time += count * 60 * 60 * 24 * sign;
-
-        if (mode == 'w')
-            current_time += count * 60 * 60 * 24 * 7 * sign;
-
-        spoor_time->end = *localtime(&current_time);
-        if (mode == 'm')
-        {
-            spoor_time->end.tm_mon += count * sign;
-            if (spoor_time->end.tm_mon <= -1)
-            {
-                spoor_time->end.tm_year -= (spoor_time->end.tm_mon * -1) /  12;
-                spoor_time->end.tm_mon -= (spoor_time->end.tm_mon * -1) % 12;
-            }
-
-            if (spoor_time->end.tm_mon >= 12)
-            {
-                spoor_time->end.tm_year += spoor_time->end.tm_mon / 12;
-                spoor_time->end.tm_mon += spoor_time->end.tm_mon % 12;
-            }
-        }
-
-
-        if (i < argument_length)
-        {
-            minute = 0;
-            for (; i < argument_length; i++)
-            {
-                if (argument[i] >= 0x30 && argument[i] <= 0x39)
-                {
-                    minute *= 10;
-                    minute += argument[i] - 0x30;
-                }
-                else
-                    break;
-            }
-            hour = minute / 100;
-            minute = minute % 100;
-        }
-        else
-        {
-            hour = -1;
-            minute = -1;
-        }
-
-        spoor_time->end.tm_hour = hour;
-        spoor_time->end.tm_min = minute;
-    }
 }
 
 void spoor_time_schedule_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time)
@@ -574,7 +223,7 @@ SpoorObject *spoor_object_create(char *arguments)
         {
             if (time_argument_count < 2)
             {
-                spoor_time_deadline_create(arguments, argument_lenght, &spoor_object->deadline + time_argument_count);
+                spoor_time_create(arguments, argument_lenght, &spoor_object->deadline + time_argument_count);
                 time_argument_count++;
             }
         }
@@ -649,7 +298,7 @@ void spoor_object_edit(SpoorObject * spoor_object, char *arguments)
         {
             if (time_argument_count < 2)
             {
-                spoor_time_deadline_create(arguments, argument_lenght, &spoor_object->deadline + time_argument_count);
+                spoor_time_create(arguments, argument_lenght, &spoor_object->deadline + time_argument_count);
                 time_argument_count++;
             }
         }
