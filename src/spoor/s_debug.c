@@ -51,6 +51,15 @@ void spoor_time_mon_format(char *format_buffer, int mon)
     }
 }
 
+void spoor_time_day_format(char *format_buffer, int day)
+{
+    if (day == -1)
+        sprintf(format_buffer, "--");
+    else
+        sprintf(format_buffer, "%s%d",
+                (day < 10) ?"" :"", day);
+}
+
 void debug_spoor_time_print(SpoorTime *spoor_time)
 {
     char format_buffer_hour_min_start[6];
@@ -71,8 +80,8 @@ void debug_spoor_time_print(SpoorTime *spoor_time)
     spoor_time_mon_format(format_buffer_mon_start, spoor_time->start.tm_mon);
     spoor_time_mon_format(format_buffer_mon_end, spoor_time->end.tm_mon);
 
-    spoor_time_mon_format(format_buffer_day_start, spoor_time->start.tm_mday);
-    spoor_time_mon_format(format_buffer_day_end, spoor_time->end.tm_mday);
+    spoor_time_day_format(format_buffer_day_start, spoor_time->start.tm_mday);
+    spoor_time_day_format(format_buffer_day_end, spoor_time->end.tm_mday);
 
     printf("%s.%s.%s %s - %s.%s.%s %s\n",
             format_buffer_day_start,

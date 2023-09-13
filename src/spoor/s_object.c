@@ -4,7 +4,6 @@
 #include<stdlib.h>
 #include<assert.h>
 #include<string.h>
-#include<time.h>
 
 /* Input [count]['d'][time] */
 void spoor_time_date_create(char *argument, uint32_t argument_length, struct tm *date)
@@ -116,20 +115,6 @@ void spoor_time_create(char *argument, uint32_t argument_length, SpoorTime *spoo
     }
 
     argument[argument_length] = last_c;
-}
-
-void spoor_time_schedule_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time)
-{
-    char *ptr = strchr(argument + 1, '-');
-    if (ptr)
-    {
-        spoor_time_date_create(argument, ptr - argument, &spoor_time->start);
-        spoor_time_date_create(argument + (ptr - argument + 1), argument_length - (ptr - argument + 1), &spoor_time->end);
-    }
-    else
-    {
-        spoor_time_date_create(argument, argument_length, &spoor_time->start);
-    }
 }
 
 uint32_t arguments_next(char **arguments, uint32_t arguments_last_length)
@@ -249,7 +234,7 @@ SpoorObject *spoor_object_create(char *arguments)
     return spoor_object;
 }
 
-void spoor_object_edit(SpoorObject * spoor_object, char *arguments)
+void spoor_object_edit(SpoorObject *spoor_object, char *arguments)
 {
     /* create title */
     uint16_t i;
@@ -306,69 +291,6 @@ void spoor_object_edit(SpoorObject * spoor_object, char *arguments)
 }
 
 #if 0
-SpoorObject *spoor_arguments_parse(uint16_t argc, char **argv)
-{
-    SpoorObject *spoor_object = malloc(sizeof(*spoor_object));
-    assert(spoor_object != NULL);
-    memset(spoor_object, 0, sizeof(*spoor_object));
-
-    /* create title */
-    char *title;
-    if (argc < 1)
-        return spoor_object;
-
-    title = argv[0];
-    uint16_t i;
-    for (i = 0; i < argc - 1; i++)
-    {
-        uint32_t argv_len = strlen(argv[i]);
-
-        /* check argv is not title */
-        if (argv[i][argv_len - 1] == ',')
-        {
-            argv[i][argv_len - 1] = 0;
-            i++;
-            break;
-        }
-
-        argv[i][argv_len] = ' ';
-    }
-
-    memcpy(spoor_object->title, title, strlen(title));
-    spoor_object->title[strlen(title)] = 0;
-
-    /* create time arguments */
-    if (i < argc && argc != 1)
-        spoortime_parse(argv[i], strlen(argv[i]), &spoor_object->deadline);
-    else
-        spoor_object->deadline.start.tm_year = -1;
-    i++;
-    if (i < argc)
-        spoortime_parse(argv[i], strlen(argv[i]), &spoor_object->schedule);
-    else
-        spoor_object->schedule.start.tm_year = -1;
-
-
-    spoor_object->type = TYPE_EVENT;
-    spoor_object->status = STATUS_NOT_STARTED;
-
-    /* create id */
-    spoor_object->id = 0;
-
-
-    /* created time */
-    time_t current_time;
-    current_time = time(NULL);
-    spoor_object->created.start = *localtime(&current_time);
-
-    /* parent */
-    spoor_object->parent_title[0] = '-';
-    spoor_object->parent_title[1] = 0;
-
-    return spoor_object;
-}
-#endif
-
 uint32_t spoor_object_size(void)
 {
     return sizeof(SpoorObject);
@@ -400,3 +322,4 @@ void spoor_object_schedule_set(SpoorObject *spoor_object, char *command)
     else
         spoor_time_schedule_create(command, strlen(command), &spoor_object->schedule);
 }
+#endif
