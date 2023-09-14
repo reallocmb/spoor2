@@ -34,6 +34,7 @@ int main(int argc, char **argv)
         char *arguments = spoor_object_argv_to_command(argc - 2, argv + 2);
         printf("Arguments %s\n", arguments);
         SpoorObject *spoor_object = spoor_object_create(arguments);
+        spoor_storage_save(spoor_object);
         spoor_debug_spoor_object_print(spoor_object);
         free(spoor_object);
     }

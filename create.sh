@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for ((i=1; i<=7; i++))
+for ((i=1; i<=320; i++))
 do
     random_id=$((RANDOM % 300 + 1))
 

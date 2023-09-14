@@ -253,6 +253,11 @@ void spoor_ui_object_show(void)
                         spoor_object_edit(&spoor_objects[index + offset], arguments + p + 2);
                         spoor_storage_change(&spoor_objects[index + offset]);
                     }
+                    else if (arguments[p + 1] == 'd')
+                    {
+                        spoor_storage_delete(&spoor_objects[index + offset]);
+                        spoor_objects_count = spoor_object_storage_load(spoor_objects);
+                    }
                     else
                     {
                         screen_clear();

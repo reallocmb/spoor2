@@ -180,7 +180,7 @@ SpoorObject *spoor_object_create(char *arguments)
     uint32_t argument_lenght = 0;
 
     uint16_t status = STATUS_NOT_STARTED; 
-    uint16_t type = TYPE_EVENT;
+    uint16_t type = TYPE_TASK;
 
     uint8_t time_argument_count = 0;
     
@@ -204,6 +204,8 @@ SpoorObject *spoor_object_create(char *arguments)
             status = STATUS_IN_PROGRESS;
         else if (strncmp(arguments, "ns", 2) == 0)
             status = STATUS_NOT_STARTED;
+        else if (strncmp(arguments, "-", 1) == 0)
+            time_argument_count++;
         else
         {
             if (time_argument_count < 2)
@@ -256,34 +258,41 @@ void spoor_object_edit(SpoorObject *spoor_object, char *arguments)
     }
 
     /* create time arguments & type & status */
-    uint32_t argument_lenght = 0;
+    uint32_t argument_length = 0;
     uint8_t time_argument_count = 0;
     
-    while ((argument_lenght = arguments_next(&arguments, argument_lenght)) != 0)
+    while ((argument_length = arguments_next(&arguments, argument_length)) != 0)
     {
-        if (strncmp(arguments, "t", 1) == 0)
+        if (strncmp(arguments, "t", argument_length) == 0)
             spoor_object->type = TYPE_TASK;
-        else if (strncmp(arguments, "p", 1) == 0)
+        else if (strncmp(arguments, "p", argument_length) == 0)
             spoor_object->type = TYPE_PROJECT;
-        else if (strncmp(arguments, "e", 1) == 0)
+        else if (strncmp(arguments, "e", argument_length) == 0)
             spoor_object->type = TYPE_EVENT;
-        else if (strncmp(arguments, "a", 1) == 0)
+        else if (strncmp(arguments, "a", argument_length) == 0)
             spoor_object->type = TYPE_APPOINTMENT;
-        else if (strncmp(arguments, "g", 1) == 0)
+        else if (strncmp(arguments, "g", argument_length) == 0)
             spoor_object->type = TYPE_GOAL;
-        else if (strncmp(arguments, "h", 1) == 0)
+        else if (strncmp(arguments, "h", argument_length) == 0)
             spoor_object->type = TYPE_HABIT;
-        else if (strncmp(arguments, "c", 1) == 0)
+        else if (strncmp(arguments, "c", argument_length) == 0)
             spoor_object->status = STATUS_COMPLETED;
-        else if (strncmp(arguments, "ip", 2) == 0)
+        else if (strncmp(arguments, "ip", argument_length) == 0)
             spoor_object->status = STATUS_IN_PROGRESS;
-        else if (strncmp(arguments, "ns", 2) == 0)
+        else if (strncmp(arguments, "ns", argument_length) == 0)
             spoor_object->status = STATUS_NOT_STARTED;
+        else if (strncmp(arguments, "-1", argument_length) == 0)
+        {
+            memset(&spoor_object->deadline + time_argument_count, -1, sizeof(spoor_object->deadline));
+            time_argument_count++;
+        }
+        else if (strncmp(arguments, "-", 1) == 0)
+            time_argument_count++;
         else
         {
             if (time_argument_count < 2)
             {
-                spoor_time_create(arguments, argument_lenght, &spoor_object->deadline + time_argument_count);
+                spoor_time_create(arguments, argument_length, &spoor_object->deadline + time_argument_count);
                 time_argument_count++;
             }
         }
