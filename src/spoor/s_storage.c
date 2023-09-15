@@ -76,6 +76,7 @@ uint32_t spoor_object_storage_load(SpoorObject *spoor_objects)
     }
 
     closedir(dir);
+    spoor_sort_objects_by_title(spoor_objects, items_total);
     return items_total;
 }
 

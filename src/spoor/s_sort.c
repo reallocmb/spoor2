@@ -1,4 +1,5 @@
 #include"spoor_internal.h"
+#include <stdlib.h>
 
 int64_t spoor_time_compare(struct tm *time1, struct tm *time2)
 {
@@ -14,53 +15,23 @@ int64_t spoor_time_compare(struct tm *time1, struct tm *time2)
         time2->tm_min);
 }
 
-#if 0
-int32_t spoor_time_compare(struct tm *time1, struct tm *time2)
+void spoor_sort_objects_by_title(SpoorObject *spoor_objects, uint32_t spoor_objects_count)
 {
-    if (time1->tm_year > time2->tm_year)
+    uint32_t i;
+    SpoorObject temp;
+    while (spoor_objects_count--)
     {
-        return 1;
-    }
-    else if (time1->tm_year < time2->tm_year)
-    {
-        return -1;
-    }
-    else if (time1->tm_year == time2->tm_year)
-    {
-        if (time1->tm_mon > time2->tm_mon)
-            return 1;
-        else if (time1->tm_mon < time2->tm_mon)
-            return -1;
-        else if (time1->tm_mon == time2->tm_mon)
+        for (i = 1; i <= spoor_objects_count; i++)
         {
-            if (time1->tm_mday > time2->tm_mday)
-                return 1;
-            else if (time1->tm_mday < time2->tm_mday)
-                return -1;
-            else if (time1->tm_mday == time2->tm_mday)
+            if (spoor_objects[i - 1].title[0] < spoor_objects[i].title[0])
             {
-                if (time1->tm_hour > time2->tm_hour)
-                    return 1;
-                else if (time1->tm_hour < time2->tm_hour)
-                    return -1;
-                else if (time1->tm_hour == time2->tm_hour)
-                {
-                    if (time1->tm_min > time2->tm_min)
-                        return 1;
-                    else if (time1->tm_min < time2->tm_min)
-                        return -1;
-                    else if (time1->tm_min == time2->tm_min)
-                    {
-                        return 0;
-                    }
-                }
+                temp = spoor_objects[i - 1];
+                spoor_objects[i - 1] = spoor_objects[i];
+                spoor_objects[i] = temp;
             }
         }
     }
-
-    return 0;
 }
-#endif
 
 void spoor_sort_objects(SpoorObject *spoor_objects, uint32_t spoor_objects_count)
 {

@@ -75,6 +75,7 @@ void spoor_time_span_create(SpoorTime *spoor_time_span, char *command);
 
 /* sort */
 int64_t spoor_time_compare(struct tm *time1, struct tm *time2);
+void spoor_sort_objects_by_title(SpoorObject *spoor_objects, uint32_t spoor_objects_count);
 
 void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time);
 
