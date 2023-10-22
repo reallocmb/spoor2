@@ -1,10 +1,11 @@
 program = spoor
 
-extern_lib =
+extern_lib = -lX11 -lc -lm -lpng -lapp
+
 
 compiler = gcc $(develop_flags)
 
-version = gnu99
+version = gnu89
 
 test_flags = -Wall -Wextra -std=$(version) -g
 develop_flags = -Wall -Wextra -std=$(version) -g

@@ -1,5 +1,6 @@
 #include<eenheid.h>
 #include<s_object.c>
+#include<s_sort.c>
 
 __EENHEID_INIT__
 SUITE(spoor_object.c)
@@ -67,6 +68,15 @@ SUITE(spoor_object.c)
 
     TEST(spoor_object_edit())
     {
+        TEST_END
+    }
+    TEST(spoor_time_compare())
+    {
+        struct tm t1 = { .tm_year = 2023, .tm_mon = 10, .tm_mday = 31 };
+        struct tm t2 = { .tm_year = 2024, .tm_mon = 1, .tm_mday = 1 };
+
+        int64_t ret = spoor_time_compare(&t1, &t2);
+        eenheid_assert(ret < 0);
         TEST_END
     }
 }

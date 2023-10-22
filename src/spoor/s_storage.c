@@ -7,13 +7,13 @@
 
 void storage_db_path(SpoorObject *spoor_object, char *db_path)
 {
-    if (spoor_object->deadline.start.tm_year == -1)
+    if (spoor_object->deadline.end.tm_year == -1)
     {
         strcpy(db_path, "000000");
     }
     else
     {
-        uint32_t year = spoor_object->deadline.start.tm_year + 1900;
+        uint32_t year = spoor_object->deadline.end.tm_year + 1900;
         db_path[3] = year % 10 + 0x30;
         year /= 10;
         db_path[2] = year % 10 + 0x30;
@@ -22,15 +22,15 @@ void storage_db_path(SpoorObject *spoor_object, char *db_path)
         year /= 10;
         db_path[0] = year % 10 + 0x30;
 
-        if (spoor_object->deadline.start.tm_mon + 1 < 10)
+        if (spoor_object->deadline.end.tm_mon + 1 < 10)
         {
             db_path[4] = '0';
-            db_path[5] = spoor_object->deadline.start.tm_mon + 1 + 0x30;
+            db_path[5] = spoor_object->deadline.end.tm_mon + 1 + 0x30;
         }
         else
         {
-            db_path[4] = (spoor_object->deadline.start.tm_mon + 1) / 10 + 0x30;
-            db_path[5] = (spoor_object->deadline.start.tm_mon + 1) % 10 + 0x30;
+            db_path[4] = (spoor_object->deadline.end.tm_mon + 1) / 10 + 0x30;
+            db_path[5] = (spoor_object->deadline.end.tm_mon + 1) % 10 + 0x30;
         }
     }
     strcpy(db_path + 6, ".rdb");
@@ -48,7 +48,7 @@ void spoor_storage_save(SpoorObject *spoor_object)
     redbas_db_close(db);
 }
 
-uint32_t spoor_object_storage_load(SpoorObject *spoor_objects)
+uint32_t spoor_object_storage_load(SpoorObject *spoor_objects, SpoorFilter *spoor_filter)
 {
     DIR *dir = opendir(".");
     struct dirent *ptr;
@@ -67,6 +67,15 @@ uint32_t spoor_object_storage_load(SpoorObject *spoor_objects)
                 /* skip temporly deleted elements */
                 if (spoor_objects[items_total + i].id == SPOOR_OBJECT_DELETED_ID)
                     items_total--;
+
+                /* filter */
+#if 0
+                printf("stc: %ld\n%ld\n", spoor_time_compare(&spoor_objects[items_total + i].deadline.end, &spoor_filter->spoor_time.start),
+                        spoor_time_compare(&spoor_objects[items_total + i].deadline.end, &spoor_filter->spoor_time.end));
+                if (spoor_time_compare(&spoor_objects[items_total + i].deadline.end, &spoor_filter->spoor_time.start) < 0 ||
+                    spoor_time_compare(&spoor_objects[items_total + i].deadline.end, &spoor_filter->spoor_time.end) > 0)
+                    items_total--;
+#endif
             }
 
             items_total += items;
@@ -76,7 +85,6 @@ uint32_t spoor_object_storage_load(SpoorObject *spoor_objects)
     }
 
     closedir(dir);
-    spoor_sort_objects_by_title(spoor_objects, items_total);
     return items_total;
 }
 
@@ -101,8 +109,7 @@ uint32_t spoor_object_storage_load_filter_time_span(SpoorObject *spoor_objects, 
                     items_total--;
 
                 /* time span filter */
-                if (spoor_time_compare(&spoor_objects[items_total + i].deadline.start, &spoor_time_span->start) == 1 ||
-                    spoor_time_compare(&spoor_objects[items_total + i].deadline.start, &spoor_time_span->end) == -1)
+                if (spoor_time_compare(&spoor_objects[items_total + i].deadline.end, &spoor_time_span->start) >= 0)
                     items_total--;
             }
 
@@ -113,6 +120,7 @@ uint32_t spoor_object_storage_load_filter_time_span(SpoorObject *spoor_objects, 
     }
 
     closedir(dir);
+    spoor_sort_objects_by_deadline(spoor_objects, items_total);
     return items_total;
 }
 
