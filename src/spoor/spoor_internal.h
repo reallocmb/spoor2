@@ -35,6 +35,7 @@ typedef struct {
 typedef struct SpoorObject {
     uint32_t id;
     char title[250];
+    char parent_title[250];
     SpoorTime deadline;
     SpoorTime schedule;
     SpoorTime tracked;
@@ -42,7 +43,10 @@ typedef struct SpoorObject {
     SpoorTime created;
     SpoorStatus status;
     SpoorType type;
-    char parent_title[250];
+    uint32_t child_id;
+    uint32_t child_id_next;
+    char child_location[7];
+    char child_location_next[7];
 } SpoorObject;
 
 typedef struct {
@@ -80,5 +84,7 @@ void spoor_sort_objects_by_title(SpoorObject *spoor_objects, uint32_t spoor_obje
 void spoor_sort_objects_by_deadline(SpoorObject *spoor_objects, uint32_t spoor_objects_count);
 
 void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time);
+
+void storage_db_path_clean(SpoorObject *spoor_object, char *db_path_clean);
 
 #endif

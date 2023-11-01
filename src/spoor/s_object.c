@@ -182,6 +182,9 @@ SpoorObject *spoor_object_create(char *arguments)
     uint16_t status = STATUS_NOT_STARTED; 
     uint16_t type = TYPE_TASK;
 
+    /* default value */
+    spoor_object->child_id = 0xffffffff;
+
     uint8_t time_argument_count = 0;
     
     while ((argument_lenght = arguments_next(&arguments, argument_lenght)) != 0)
@@ -206,6 +209,15 @@ SpoorObject *spoor_object_create(char *arguments)
             status = STATUS_NOT_STARTED;
         else if (strncmp(arguments, "-", 1) == 0)
             time_argument_count++;
+        else if (strncmp(arguments, "l", 1) == 0)
+        {
+            spoor_object->child_id = 0;
+            for (i = 1; i < argument_lenght; i++)
+            {
+                spoor_object->child_id *= 10;
+                spoor_object->child_id += arguments[i] - 0x30;
+            }
+        }
         else
         {
             if (time_argument_count < 2)

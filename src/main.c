@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 {
     /* change current directory to database directory */
     char *home_directory = getenv("HOME");
-    char database_path[strlen(home_directory) + 7 + 1];
+    char *database_path = malloc((strlen(home_directory) + 7 + 1) * sizeof(*database_path));
 #ifdef RELEASE
     strcpy(database_path, home_directory);
     strcpy(database_path + strlen(home_directory), "/.spoor");
@@ -22,6 +22,8 @@ int main(int argc, char **argv)
 #endif
     mkdir(database_path, 0777);
     chdir(database_path);
+
+    free(database_path);
 
     if (argc <= 1)
         spoor_ui_object_show();

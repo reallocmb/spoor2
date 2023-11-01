@@ -112,5 +112,9 @@ void spoor_debug_spoor_object_print(SpoorObject *spoor_object)
     debug_spoor_time_print(&spoor_object->created);
     printf("%-20s%s\n","Status:", DEBUG_STATUS[spoor_object->status]);
     printf("%-20s%s\n", "Type:", DEBUG_TYPES[spoor_object->type]);
+    printf("%-20s%d\n", "Child-ID:", spoor_object->child_id);
+    printf("%-20s%d\n", "Child-ID-next:", spoor_object->child_id_next);
+    printf("%-20s%s\n", "Child-LOCATION:", spoor_object->child_location);
+    printf("%-20s%s\n", "Child-LOCATION-next:", spoor_object->child_location_next);
     printf("-- SpoorObject ]\n");
 }

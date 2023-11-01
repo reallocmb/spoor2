@@ -5,34 +5,41 @@
 #include<string.h>
 #include<dirent.h>
 
-void storage_db_path(SpoorObject *spoor_object, char *db_path)
+void storage_db_path_clean(SpoorObject *spoor_object, char *db_path_clean)
 {
     if (spoor_object->deadline.end.tm_year == -1)
     {
-        strcpy(db_path, "000000");
+        strcpy(db_path_clean, "000000");
     }
     else
     {
         uint32_t year = spoor_object->deadline.end.tm_year + 1900;
-        db_path[3] = year % 10 + 0x30;
+        db_path_clean[3] = year % 10 + 0x30;
         year /= 10;
-        db_path[2] = year % 10 + 0x30;
+        db_path_clean[2] = year % 10 + 0x30;
         year /= 10;
-        db_path[1] = year % 10 + 0x30;
+        db_path_clean[1] = year % 10 + 0x30;
         year /= 10;
-        db_path[0] = year % 10 + 0x30;
+        db_path_clean[0] = year % 10 + 0x30;
 
         if (spoor_object->deadline.end.tm_mon + 1 < 10)
         {
-            db_path[4] = '0';
-            db_path[5] = spoor_object->deadline.end.tm_mon + 1 + 0x30;
+            db_path_clean[4] = '0';
+            db_path_clean[5] = spoor_object->deadline.end.tm_mon + 1 + 0x30;
         }
         else
         {
-            db_path[4] = (spoor_object->deadline.end.tm_mon + 1) / 10 + 0x30;
-            db_path[5] = (spoor_object->deadline.end.tm_mon + 1) % 10 + 0x30;
+            db_path_clean[4] = (spoor_object->deadline.end.tm_mon + 1) / 10 + 0x30;
+            db_path_clean[5] = (spoor_object->deadline.end.tm_mon + 1) % 10 + 0x30;
         }
     }
+
+    db_path_clean[6] = 0;
+}
+
+void storage_db_path(SpoorObject *spoor_object, char *db_path)
+{
+    storage_db_path_clean(spoor_object, db_path);
     strcpy(db_path + 6, ".rdb");
     db_path[10] = 0;
 }

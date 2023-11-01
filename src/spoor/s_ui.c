@@ -5,6 +5,7 @@
 #include"spoor_internal.h"
 
 #include<stdio.h>
+#include<stdlib.h>
 #include<graphapp.h>
 #include<stdbool.h>
 #include<string.h>
@@ -257,6 +258,33 @@ void spoor_ui_object_show(void)
                 else if (strncmp(arguments + 1, "c", 1) == 0)
                 {
                     SpoorObject *spoor_object = spoor_object_create(arguments + 2);
+                    if (spoor_object->child_id != 0xffffffff)
+                    {
+#if 0
+                        spoor_object_child(&spoor_objects[spoor_object->child_id], spoor_object);
+#endif
+                        char location[7];
+                        if (spoor_objects[spoor_object->child_id].child_id == 0xffffffff)
+                        {
+                            spoor_objects[spoor_object->child_id].child_id = spoor_object->id;
+                            storage_db_path_clean(spoor_object, location);
+                            strcpy(spoor_objects[spoor_object->child_id].child_location, location);
+
+                            spoor_object->child_id_next = 0xffffffff;
+                        }
+                        else
+                        {
+                            spoor_object->child_id_next = spoor_objects[spoor_objects->child_id].child_id;
+                            strcpy(spoor_object->child_location_next, spoor_objects[spoor_objects->child_id].child_location_next);
+
+                            spoor_objects[spoor_object->child_id].child_id = spoor_object->id;
+                            storage_db_path_clean(spoor_object, location);
+                            strcpy(spoor_objects[spoor_object->child_id].child_location, location);
+                        }
+
+                        spoor_storage_change(&spoor_objects[spoor_object->child_id]);
+                        spoor_object->child_id = 0xffffffff;
+                    }
                     spoor_storage_save(spoor_object);
                     free(spoor_object);
                     spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);
