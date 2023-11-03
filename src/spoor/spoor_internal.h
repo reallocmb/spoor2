@@ -86,5 +86,6 @@ void spoor_sort_objects_by_deadline(SpoorObject *spoor_objects, uint32_t spoor_o
 void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time);
 
 void storage_db_path_clean(SpoorObject *spoor_object, char *db_path_clean);
+void spoor_object_children_append(SpoorObject *spoor_object_head, SpoorObject *spoor_object)
 
 #endif

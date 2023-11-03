@@ -1,6 +1,6 @@
 program = spoor
 
-extern_lib = -lX11 -lc -lm -lpng -lapp
+extern_lib = 
 
 
 compiler = gcc $(develop_flags)

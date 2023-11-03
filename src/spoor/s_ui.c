@@ -6,7 +6,6 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include<graphapp.h>
 #include<stdbool.h>
 #include<string.h>
 #include<termios.h>
@@ -259,35 +258,10 @@ void spoor_ui_object_show(void)
                 {
                     SpoorObject *spoor_object = spoor_object_create(arguments + 2);
                     if (spoor_object->child_id != 0xffffffff)
-                    {
-#if 0
-                        spoor_object_child(&spoor_objects[spoor_object->child_id], spoor_object);
-#endif
-                        char location[7];
-                        if (spoor_objects[spoor_object->child_id].child_id == 0xffffffff)
-                        {
-                            spoor_object->child_id_next = 0xffffffff;
-                            spoor_storage_save(spoor_object);
+                        spoor_object_children_append(&spoor_objects[spoor_object->child_id], spoor_object);
+                    else
+                        spoor_storage_save(spoor_object);
 
-                            spoor_objects[spoor_object->child_id].child_id = spoor_object->id;
-                            storage_db_path_clean(spoor_object, location);
-                            strcpy(spoor_objects[spoor_object->child_id].child_location, location);
-
-                        }
-                        else
-                        {
-                            spoor_object->child_id_next = spoor_objects[spoor_objects->child_id].child_id;
-                            strcpy(spoor_object->child_location_next, spoor_objects[spoor_objects->child_id].child_location_next);
-                            spoor_storage_save(spoor_object);
-
-                            spoor_objects[spoor_object->child_id].child_id = spoor_object->id;
-                            storage_db_path_clean(spoor_object, location);
-                            strcpy(spoor_objects[spoor_object->child_id].child_location, location);
-                        }
-
-                        spoor_storage_change(&spoor_objects[spoor_object->child_id]);
-                        spoor_object->child_id = 0xffffffff;
-                    }
                     free(spoor_object);
                     spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);
                 }
@@ -326,13 +300,18 @@ void spoor_ui_object_show(void)
                     {
                         SpoorObject old = spoor_objects[index + offset];
                         spoor_object_edit(&spoor_objects[index + offset], arguments + p + 2);
-                        if (old.deadline.end.tm_year == spoor_objects[index + offset].deadline.end.tm_year &&
-                            old.deadline.end.tm_mon == spoor_objects[index + offset].deadline.end.tm_mon)
-                            spoor_storage_change(&spoor_objects[index + offset]);
+                        if (spoor_object->child_id != 0xffffffff)
+                            spoor_object_children_append(&spoor_objects[spoor_object->child_id], spoor_object);
                         else
                         {
-                            spoor_storage_delete(&old);
-                            spoor_storage_save(&spoor_objects[index + offset]);
+                            if (old.deadline.end.tm_year == spoor_objects[index + offset].deadline.end.tm_year &&
+                                    old.deadline.end.tm_mon == spoor_objects[index + offset].deadline.end.tm_mon)
+                                spoor_storage_change(&spoor_objects[index + offset]);
+                            else
+                            {
+                                spoor_storage_delete(&old);
+                                spoor_storage_save(&spoor_objects[index + offset]);
+                            }
                         }
                         spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);
                     }
