@@ -183,8 +183,12 @@ SpoorObject *spoor_object_create(char *arguments)
     uint16_t type = TYPE_TASK;
 
     /* default value */
+    spoor_object->parent_id = 0xffffffff;
     spoor_object->child_id = 0xffffffff;
     spoor_object->child_id_next = 0xffffffff;
+    spoor_object->parent_location[0] = 0;
+    spoor_object->child_location[0] = 0;
+    spoor_object->child_location_next[0] = 0;
 
     uint8_t time_argument_count = 0;
     
@@ -212,12 +216,13 @@ SpoorObject *spoor_object_create(char *arguments)
             time_argument_count++;
         else if (strncmp(arguments, "l", 1) == 0)
         {
-            spoor_object->child_id = 0;
+            spoor_object->parent_id = 0;
             for (i = 1; i < argument_lenght; i++)
             {
-                spoor_object->child_id *= 10;
-                spoor_object->child_id += arguments[i] - 0x30;
+                spoor_object->parent_id *= 10;
+                spoor_object->parent_id += arguments[i] - 0x30;
             }
+            spoor_object->parent_location[0] = '-';
         }
         else
         {
@@ -249,8 +254,10 @@ SpoorObject *spoor_object_create(char *arguments)
     return spoor_object;
 }
 
-void spoor_object_edit(SpoorObject *spoor_object, char *arguments)
+bool spoor_object_edit(SpoorObject *spoor_object, char *arguments)
 {
+    SpoorObject old = *spoor_object;
+
     /* create title */
     uint16_t i;
 
@@ -269,10 +276,6 @@ void spoor_object_edit(SpoorObject *spoor_object, char *arguments)
 
         arguments += i;
     }
-
-    /* default value */
-    spoor_object->child_id = 0xffffffff;
-    spoor_object->child_id_next = 0xffffffff;
 
     /* create time arguments & type & status */
     uint32_t argument_length = 0;
@@ -300,8 +303,9 @@ void spoor_object_edit(SpoorObject *spoor_object, char *arguments)
             spoor_object->status = STATUS_NOT_STARTED;
         else if (strncmp(arguments, "l", 1) == 0)
         {
+            spoor_object->child_location[0] = 0;
             spoor_object->child_id = 0;
-            for (i = 1; i < argument_lenght; i++)
+            for (i = 1; i < argument_length; i++)
             {
                 spoor_object->child_id *= 10;
                 spoor_object->child_id += arguments[i] - 0x30;
@@ -323,38 +327,91 @@ void spoor_object_edit(SpoorObject *spoor_object, char *arguments)
             }
         }
     }
+
+    if (old.deadline.end.tm_year == spoor_object->deadline.end.tm_year &&
+            old.deadline.end.tm_mon == spoor_object->deadline.end.tm_mon)
+        return 1;
+    else
+        return 0;
 }
 
-void spoor_object_children_append(SpoorObject *spoor_object_head, SpoorObject *spoor_object)
+#if 0
+void spoor_object_children_append_edit(SpoorObject *spoor_object_head, SpoorObject *spoor_object, SpoorObject *old)
 {
-    SpoorObject *spoor_objects_element = &spoor_objects[spoor_object->child_id];
     char location[7];
-    if (spoor_objects_element->child_id == 0xffffffff)
+    if (spoor_object_head->child_id == 0xffffffff)
     {
         spoor_object->child_id = 0xffffffff;
         spoor_object->child_id_next = 0xffffffff;
-        strcpy(spoor_object->parent_title, spoor_objects_element->title);
-        spoor_storage_save(spoor_object);
+        strcpy(spoor_object->parent_title, spoor_object_head->title);
+        if (old->deadline.end.tm_year == spoor_object->deadline.end.tm_year &&
+                old->deadline.end.tm_mon == spoor_object->deadline.end.tm_mon)
+            spoor_storage_change(spoor_object);
+        else
+        {
+            spoor_storage_delete(old);
+            spoor_storage_save(spoor_object);
+        }
 
-        spoor_objects_element->child_id = spoor_object->id;
+
+        spoor_object_head->child_id = spoor_object->id;
         storage_db_path_clean(spoor_object, location);
-        strcpy(spoor_objects_element->child_location, location);
-        spoor_storage_change(spoor_objects_element);
+        strcpy(spoor_object_head->child_location, location);
+        spoor_storage_change(spoor_object_head);
     }
     else
     {
         spoor_object->child_id = 0xffffffff;
-        spoor_object->child_id_next = spoor_objects_element->child_id;
-        strcpy(spoor_object->child_location_next, spoor_objects_element->child_location_next);
-        strcpy(spoor_object->parent_title, spoor_objects_element->title);
-        spoor_storage_save(spoor_object);
+        spoor_object->child_id_next = spoor_object_head->child_id;
+        strcpy(spoor_object->child_location_next, spoor_object_head->child_location_next);
+        strcpy(spoor_object->parent_title, spoor_object_head->title);
+        if (old->deadline.end.tm_year == spoor_object->deadline.end.tm_year &&
+                old->deadline.end.tm_mon == spoor_object->deadline.end.tm_mon)
+            spoor_storage_change(spoor_object);
+        else
+        {
+            spoor_storage_delete(old);
+            spoor_storage_save(spoor_object);
+        }
 
-        spoor_objects_element->child_id = spoor_object->id;
+        spoor_object_head->child_id = spoor_object->id;
         storage_db_path_clean(spoor_object, location);
-        strcpy(spoor_objects_element->child_location, location);
-        spoor_storage_change(spoor_objects_element);
+        strcpy(spoor_object_head->child_location, location);
+        spoor_storage_change(spoor_object_head);
     }
 }
+
+void spoor_object_children_append(SpoorObject *spoor_object_head, SpoorObject *spoor_object)
+{
+    char location[7];
+    if (spoor_object_head->child_id == 0xffffffff)
+    {
+        spoor_object->child_id = 0xffffffff;
+        spoor_object->child_id_next = 0xffffffff;
+        strcpy(spoor_object->parent_title, spoor_object_head->title);
+
+        spoor_storage_save(spoor_object);
+
+        spoor_object_head->child_id = spoor_object->id;
+        storage_db_path_clean(spoor_object, location);
+        strcpy(spoor_object_head->child_location, location);
+        spoor_storage_change(spoor_object_head);
+    }
+    else
+    {
+        spoor_object->child_id = 0xffffffff;
+        spoor_object->child_id_next = spoor_object_head->child_id;
+        strcpy(spoor_object->child_location_next, spoor_object_head->child_location_next);
+        strcpy(spoor_object->parent_title, spoor_object_head->title);
+        spoor_storage_save(spoor_object);
+
+        spoor_object_head->child_id = spoor_object->id;
+        storage_db_path_clean(spoor_object, location);
+        strcpy(spoor_object_head->child_location, location);
+        spoor_storage_change(spoor_object_head);
+    }
+}
+#endif
 
 #if 0
 uint32_t spoor_object_size(void)

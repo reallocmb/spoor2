@@ -44,13 +44,42 @@ void storage_db_path(SpoorObject *spoor_object, char *db_path)
     db_path[10] = 0;
 }
 
-void spoor_storage_save(SpoorObject *spoor_object)
+void spoor_storage_save(SpoorObject *spoor_objects, SpoorObject *spoor_object)
 {
     char db_path[11];
     storage_db_path(spoor_object, db_path);
 
     RedbasDB *db = redbas_db_open(db_path, sizeof(*spoor_object));
     spoor_object->id = redbas_db_items(db);
+    char location[7];
+    if (spoor_object->parent_location[0] == '-')
+    {
+        SpoorObject *spoor_object_head = &spoor_objects[spoor_object->parent_id];
+        if (spoor_objects[spoor_object->parent_id].child_id == 0xffffffff)
+        {
+            spoor_object->parent_id = spoor_object_head->id;
+            storage_db_path_clean(spoor_object_head, location);
+            strcpy(spoor_object->parent_location, location);
+            strcpy(spoor_object->parent_title, spoor_object_head->title);
+
+            spoor_object_head->child_id = spoor_object->id;
+            storage_db_path_clean(spoor_object, location);
+            strcpy(spoor_object_head->child_location, location);
+            spoor_storage_change(spoor_object_head);
+        }
+        else
+        {
+            spoor_object->child_id = 0xffffffff;
+            spoor_object->child_id_next = spoor_object_head->child_id;
+            strcpy(spoor_object->child_location_next, spoor_object_head->child_location_next);
+            strcpy(spoor_object->parent_title, spoor_object_head->title);
+
+            spoor_object_head->child_id = spoor_object->id;
+            storage_db_path_clean(spoor_object, location);
+            strcpy(spoor_object_head->child_location, location);
+            spoor_storage_change(spoor_object_head);
+        }
+    }
     redbas_db_store(db, spoor_object, sizeof(*spoor_object));
     redbas_db_close(db);
 }

@@ -2,7 +2,6 @@ program = spoor
 
 extern_lib = 
 
-
 compiler = gcc $(develop_flags)
 
 version = gnu89

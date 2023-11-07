@@ -3,6 +3,7 @@
 
 #include<time.h>
 #include<stdint.h>
+#include<stdbool.h>
 
 typedef enum {
     STATUS_NOT_STARTED,
@@ -43,8 +44,10 @@ typedef struct SpoorObject {
     SpoorTime created;
     SpoorStatus status;
     SpoorType type;
+    uint32_t parent_id;
     uint32_t child_id;
     uint32_t child_id_next;
+    char parent_location[7];
     char child_location[7];
     char child_location_next[7];
 } SpoorObject;
@@ -57,7 +60,7 @@ typedef struct {
 } SpoorSort;
 
 SpoorObject *spoor_object_create(char *arguments);
-void spoor_object_edit(SpoorObject * spoor_object, char *arguments);
+bool spoor_object_edit(SpoorObject *spoor_object, char *arguments);
 
 void mdb_func_error_check(int error, char *func_name, int line, char *file);
 void spoor_debug_spoor_object_print(SpoorObject *spoor_object);
@@ -66,7 +69,7 @@ uint32_t spoor_object_storage_load(SpoorObject *spoor_objects, SpoorFilter *spoo
 void spoor_sort_objects(SpoorObject *spoor_objects, uint32_t spoor_objects_count);
 
 void spoor_object_progress_change(SpoorObject *spoor_object, SpoorStatus status);
-void spoor_storage_save(SpoorObject *spoor_object);
+void spoor_storage_save(SpoorObject *spoor_objects, SpoorObject *spoor_object);
 
 void spoor_storage_change(SpoorObject *spoor_object);
 void spoor_storage_delete(SpoorObject *spoor_object);
@@ -86,6 +89,7 @@ void spoor_sort_objects_by_deadline(SpoorObject *spoor_objects, uint32_t spoor_o
 void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time);
 
 void storage_db_path_clean(SpoorObject *spoor_object, char *db_path_clean);
-void spoor_object_children_append(SpoorObject *spoor_object_head, SpoorObject *spoor_object)
+void spoor_object_children_append(SpoorObject *spoor_object_head, SpoorObject *spoor_object);
+void spoor_object_children_append_edit(SpoorObject *spoor_object_head, SpoorObject *spoor_object, SpoorObject *old);
 
 #endif

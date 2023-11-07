@@ -1,7 +1,3 @@
-#if 0
-#define UI_GRAPHAPP
-#endif
-
 #include"spoor_internal.h"
 
 #include<stdio.h>
@@ -257,10 +253,7 @@ void spoor_ui_object_show(void)
                 else if (strncmp(arguments + 1, "c", 1) == 0)
                 {
                     SpoorObject *spoor_object = spoor_object_create(arguments + 2);
-                    if (spoor_object->child_id != 0xffffffff)
-                        spoor_object_children_append(&spoor_objects[spoor_object->child_id], spoor_object);
-                    else
-                        spoor_storage_save(spoor_object);
+                    spoor_storage_save(spoor_objects, spoor_object);
 
                     free(spoor_object);
                     spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);
@@ -298,21 +291,15 @@ void spoor_ui_object_show(void)
                     }
                     if (arguments[p + 1] == 'e')
                     {
-                        SpoorObject old = spoor_objects[index + offset];
-                        spoor_object_edit(&spoor_objects[index + offset], arguments + p + 2);
-                        if (spoor_object->child_id != 0xffffffff)
-                            spoor_object_children_append(&spoor_objects[spoor_object->child_id], spoor_object);
+                        if (spoor_object_edit(&spoor_objects[index + offset], arguments + p + 2))
+                        {
+                            /* change */
+                        }
                         else
                         {
-                            if (old.deadline.end.tm_year == spoor_objects[index + offset].deadline.end.tm_year &&
-                                    old.deadline.end.tm_mon == spoor_objects[index + offset].deadline.end.tm_mon)
-                                spoor_storage_change(&spoor_objects[index + offset]);
-                            else
-                            {
-                                spoor_storage_delete(&old);
-                                spoor_storage_save(&spoor_objects[index + offset]);
-                            }
+                            /* delete and new */
                         }
+
                         spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);
                     }
                     else if (arguments[p + 1] == 'd')
