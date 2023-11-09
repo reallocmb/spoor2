@@ -298,6 +298,8 @@ void spoor_ui_object_show(void)
                         else
                         {
                             /* delete and new */
+                            spoor_storage_delete(&spoor_objects[index + offset]);
+                            spoor_storage_save(spoor_objects, &spoor_objects[index + offset]);
                         }
 
                         spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);

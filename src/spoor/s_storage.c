@@ -51,31 +51,33 @@ void spoor_storage_save(SpoorObject *spoor_objects, SpoorObject *spoor_object)
 
     RedbasDB *db = redbas_db_open(db_path, sizeof(*spoor_object));
     spoor_object->id = redbas_db_items(db);
-    char location[7];
+    char location[11];
     if (spoor_object->parent_location[0] == '-')
     {
         SpoorObject *spoor_object_head = &spoor_objects[spoor_object->parent_id];
         if (spoor_objects[spoor_object->parent_id].child_id == 0xffffffff)
         {
             spoor_object->parent_id = spoor_object_head->id;
-            storage_db_path_clean(spoor_object_head, location);
+            storage_db_path(spoor_object_head, location);
             strcpy(spoor_object->parent_location, location);
             strcpy(spoor_object->parent_title, spoor_object_head->title);
 
             spoor_object_head->child_id = spoor_object->id;
-            storage_db_path_clean(spoor_object, location);
+            storage_db_path(spoor_object, location);
             strcpy(spoor_object_head->child_location, location);
             spoor_storage_change(spoor_object_head);
         }
         else
         {
-            spoor_object->child_id = 0xffffffff;
+            spoor_object->parent_id = spoor_object_head->id;
             spoor_object->child_id_next = spoor_object_head->child_id;
-            strcpy(spoor_object->child_location_next, spoor_object_head->child_location_next);
+            strcpy(spoor_object->child_location_next, spoor_object_head->child_location);
+            storage_db_path(spoor_object_head, location);
+            strcpy(spoor_object->parent_location, location);
             strcpy(spoor_object->parent_title, spoor_object_head->title);
 
             spoor_object_head->child_id = spoor_object->id;
-            storage_db_path_clean(spoor_object, location);
+            storage_db_path(spoor_object, location);
             strcpy(spoor_object_head->child_location, location);
             spoor_storage_change(spoor_object_head);
         }
@@ -173,11 +175,46 @@ void spoor_storage_change(SpoorObject *spoor_object)
 void spoor_storage_delete(SpoorObject *spoor_object)
 {
     char db_path[11];
-    storage_db_path(spoor_object, db_path);
 
     uint32_t db_id = spoor_object->id;
     spoor_object->id = SPOOR_OBJECT_DELETED_ID;
 
+    if (spoor_object->child_id != 0xffffffff)
+    {
+        SpoorObject spoor_object_ptr;
+        RedbasDB *db;
+        storage_db_path(spoor_object, db_path);
+        db = redbas_db_open(db_path, sizeof(spoor_object_ptr));
+        redbas_db_restore_cursor_set(db, db_id);
+        redbas_db_restore(db, &spoor_object_ptr, sizeof(spoor_object_ptr));
+        redbas_db_close(db);
+
+        uint32_t index = spoor_object_ptr.child_id;
+        char *location = spoor_object_ptr.child_location;
+
+        while (index != 0xffffffff)
+        {
+            db = redbas_db_open(location, sizeof(*spoor_object));
+            redbas_db_restore_cursor_set(db, index);
+            redbas_db_restore(db, &spoor_object_ptr, sizeof(spoor_object_ptr));
+
+            index = spoor_object_ptr.child_id_next;
+            location = spoor_object_ptr.child_location_next;
+
+            SpoorObject spoor_object_change;
+            spoor_object_change = spoor_object_ptr;
+            spoor_object_change.child_id_next = 0xffffffff;
+            spoor_object_change.child_location_next[0] = 0;
+            spoor_object_change.parent_id = 0xffffffff;
+            spoor_object_change.parent_location[0] = 0;
+            spoor_object_change.parent_title[0] = 0;
+
+            redbas_db_change(db, &spoor_object_change, sizeof(spoor_object_change), spoor_object_change.id);
+            redbas_db_close(db);
+        }
+    }
+
+    storage_db_path(spoor_object, db_path);
     RedbasDB *db = redbas_db_open(db_path, sizeof(*spoor_object));
     redbas_db_change(db, spoor_object, sizeof(*spoor_object), db_id);
     redbas_db_close(db);
@@ -200,6 +237,7 @@ void spoor_storage_clean_up(void)
             uint32_t spoor_object_index;
             for (i = 0, spoor_object_index = 0; i < items; i++)
             {
+                /* todo link prev to next */
 
                 redbas_db_restore_cursor_set(db, i);
                 redbas_db_restore(db, &spoor_object, sizeof(spoor_object));

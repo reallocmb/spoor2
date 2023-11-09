@@ -47,9 +47,9 @@ typedef struct SpoorObject {
     uint32_t parent_id;
     uint32_t child_id;
     uint32_t child_id_next;
-    char parent_location[7];
-    char child_location[7];
-    char child_location_next[7];
+    char parent_location[11];
+    char child_location[11];
+    char child_location_next[11];
 } SpoorObject;
 
 typedef struct {
