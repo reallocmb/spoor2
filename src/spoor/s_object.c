@@ -303,6 +303,9 @@ bool spoor_object_edit(SpoorObject *spoor_object, char *arguments)
             spoor_object->status = STATUS_NOT_STARTED;
         else if (strncmp(arguments, "l", 1) == 0)
         {
+            if (spoor_object->parent_id != 0xffffffff)
+                spoor_storage_object_remove(spoor_object);
+
             spoor_object->parent_id = 0;
             for (i = 1; i < argument_length; i++)
             {

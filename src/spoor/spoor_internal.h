@@ -91,5 +91,7 @@ void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorT
 void storage_db_path_clean(SpoorObject *spoor_object, char *db_path_clean);
 void spoor_object_children_append(SpoorObject *spoor_object_head, SpoorObject *spoor_object);
 void spoor_object_children_append_edit(SpoorObject *spoor_object_head, SpoorObject *spoor_object, SpoorObject *old);
+void spoor_storage_object_append(SpoorObject *spoor_object_parent, SpoorObject *spoor_object);
+void spoor_storage_object_remove(SpoorObject *spoor_object);
 
 #endif

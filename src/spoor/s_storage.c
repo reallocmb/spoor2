@@ -84,10 +84,11 @@ void spoor_storage_save(SpoorObject *spoor_objects, SpoorObject *spoor_object)
     char db_path[11];
     storage_db_path(spoor_object, db_path);
 
-    spoor_storage_object_append(&spoor_objects[spoor_object->parent_id], spoor_object);
-
     RedbasDB *db = redbas_db_open(db_path, sizeof(*spoor_object));
     spoor_object->id = redbas_db_items(db);
+
+    spoor_storage_object_append(&spoor_objects[spoor_object->parent_id], spoor_object);
+
     redbas_db_store(db, spoor_object, sizeof(*spoor_object));
     redbas_db_close(db);
 }
@@ -181,6 +182,7 @@ void spoor_storage_change(SpoorObject *spoor_object)
 void spoor_storage_object_remove(SpoorObject *spoor_object)
 {
     char db_path[11];
+    storage_db_path(spoor_object, db_path);
     /* is spoor_object part of a list */
     if (spoor_object->parent_id != 0xffffffff)
     {
@@ -267,7 +269,8 @@ void spoor_storage_object_remove(SpoorObject *spoor_object)
             spoor_object_change.child_location_next[0] = 0;
             spoor_object_change.parent_id = 0xffffffff;
             spoor_object_change.parent_location[0] = 0;
-            spoor_object_change.parent_title[0] = 0;
+            spoor_object_change.parent_title[0] = '-';
+            spoor_object_change.parent_title[1] = 0;
 
             redbas_db_change(db, &spoor_object_change, sizeof(spoor_object_change), spoor_object_change.id);
             redbas_db_close(db);
@@ -279,8 +282,6 @@ void spoor_storage_delete(SpoorObject *spoor_object)
 {
     char db_path[11];
     storage_db_path(spoor_object, db_path);
-
-    spoor_storage_object_remove(spoor_object);
 
     uint32_t db_id = spoor_object->id;
     spoor_object->id = SPOOR_OBJECT_DELETED_ID;

@@ -304,30 +304,34 @@ void spoor_ui_object_show(void)
                         index += arguments[1 + p] - 0x30;
                         p++;
                     }
+                    SpoorObject *spoor_object = &spoor_objects[index + offset];
                     if (arguments[p + 1] == 'e')
                     {
-                        if (spoor_object_edit(&spoor_objects[index + offset], arguments + p + 2))
+                        if (spoor_object_edit(spoor_object, arguments + p + 2))
                         {
-                            spoor_storage_change(&spoor_objects[index + offset]);
+                            spoor_storage_object_append(&spoor_objects[spoor_object->parent_id], spoor_object);
+                            spoor_storage_change(spoor_object);
                         }
                         else
                         {
-                            spoor_storage_delete(&spoor_objects[index + offset]);
-                            spoor_storage_save(spoor_objects, &spoor_objects[index + offset]);
+                            spoor_storage_object_remove(spoor_object);
+                            spoor_storage_delete(spoor_object);
+                            spoor_storage_save(spoor_objects, spoor_object);
                         }
 
                         spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);
                     }
                     else if (arguments[p + 1] == 'd')
                     {
-                        spoor_storage_delete(&spoor_objects[index + offset]);
+                        spoor_storage_object_remove(spoor_object);
+                        spoor_storage_delete(spoor_object);
                         spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);
                     }
                     else
                     {
                         screen_clear();
                         cursor_move(0, 0);
-                        spoor_debug_spoor_object_print(&spoor_objects[index + offset]);
+                        spoor_debug_spoor_object_print(spoor_object);
                         getchar();
                     }
                 }
