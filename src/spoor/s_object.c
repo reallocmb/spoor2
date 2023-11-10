@@ -177,7 +177,7 @@ SpoorObject *spoor_object_create(char *arguments)
     arguments += i;
 
     /* create time arguments & type & status */
-    uint32_t argument_lenght = 0;
+    uint32_t argument_length = 0;
 
     uint16_t status = STATUS_NOT_STARTED; 
     uint16_t type = TYPE_TASK;
@@ -192,7 +192,7 @@ SpoorObject *spoor_object_create(char *arguments)
 
     uint8_t time_argument_count = 0;
     
-    while ((argument_lenght = arguments_next(&arguments, argument_lenght)) != 0)
+    while ((argument_length = arguments_next(&arguments, argument_length)) != 0)
     {
         if (strncmp(arguments, "t", 1) == 0)
             type = TYPE_TASK;
@@ -217,7 +217,7 @@ SpoorObject *spoor_object_create(char *arguments)
         else if (strncmp(arguments, "l", 1) == 0)
         {
             spoor_object->parent_id = 0;
-            for (i = 1; i < argument_lenght; i++)
+            for (i = 1; i < argument_length; i++)
             {
                 spoor_object->parent_id *= 10;
                 spoor_object->parent_id += arguments[i] - 0x30;
@@ -228,7 +228,7 @@ SpoorObject *spoor_object_create(char *arguments)
         {
             if (time_argument_count < 2)
             {
-                spoor_time_create(arguments, argument_lenght, &spoor_object->deadline + time_argument_count);
+                spoor_time_create(arguments, argument_length, &spoor_object->deadline + time_argument_count);
                 time_argument_count++;
             }
         }
@@ -303,13 +303,13 @@ bool spoor_object_edit(SpoorObject *spoor_object, char *arguments)
             spoor_object->status = STATUS_NOT_STARTED;
         else if (strncmp(arguments, "l", 1) == 0)
         {
-            spoor_object->child_location[0] = 0;
-            spoor_object->child_id = 0;
+            spoor_object->parent_id = 0;
             for (i = 1; i < argument_length; i++)
             {
-                spoor_object->child_id *= 10;
-                spoor_object->child_id += arguments[i] - 0x30;
+                spoor_object->parent_id *= 10;
+                spoor_object->parent_id += arguments[i] - 0x30;
             }
+            spoor_object->parent_location[0] = '-';
         }
         else if (strncmp(arguments, "-1", 2) == 0)
         {

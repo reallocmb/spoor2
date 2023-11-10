@@ -69,6 +69,19 @@ void time_format_parse_deadline(SpoorTime *spoor_time, char *time_format)
             time_format_start);
 }
 
+void title_format_parse(char *title, char *title_format)
+{
+    if (strlen(title) >= 30)
+    {
+        strncpy(title_format, title, 25);
+        strcpy(title_format + 25, "...");
+    }
+    else
+        strcpy(title_format, title);
+    title_format[29] = 0;
+
+}
+
 void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format)
 {
     if (spoor_time->end.tm_year == -1)
@@ -204,19 +217,21 @@ void spoor_ui_object_show(void)
         fprintf(stdout, "--------------------------------------------------------------------------------------------------------------");
 
         /* print spoor_objects */
+        char title_format[30];
         char time_format_deadline[50] = { 0 };
         char time_format_schedule[50] = { 0 };
 
         uint32_t i;
         for (i = 0; i < spoor_objects_count && i < window_rows - 5; i++)
         {
+            title_format_parse(spoor_objects[i + offset].title, title_format);
             time_format_parse_deadline(&spoor_objects[i + offset].deadline, time_format_deadline);
             time_format_parse_schedule(&spoor_objects[i + offset].schedule, time_format_schedule);
             cursor_move(0, 3 + i);
             fprintf(stdout,
                     "%-5d%-30s%-18s%-24s%-21s%-13s%s",
                     i,
-                    spoor_objects[i + offset].title,
+                    title_format,
                     time_format_deadline,
                     time_format_schedule,
                     UI_STATUS[spoor_objects[i + offset].status],
@@ -293,11 +308,10 @@ void spoor_ui_object_show(void)
                     {
                         if (spoor_object_edit(&spoor_objects[index + offset], arguments + p + 2))
                         {
-                            /* change */
+                            spoor_storage_change(&spoor_objects[index + offset]);
                         }
                         else
                         {
-                            /* delete and new */
                             spoor_storage_delete(&spoor_objects[index + offset]);
                             spoor_storage_save(spoor_objects, &spoor_objects[index + offset]);
                         }
