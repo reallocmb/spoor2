@@ -29,6 +29,7 @@ void spoor_sort_objects(SpoorObject *spoor_objects, uint32_t spoor_objects_count
 
 /* UI */
 void spoor_ui_object_show(void);
+void spoor_ui_graphapp_object_show(void);
 
 /* Debugging */
 #ifdef DEBUG

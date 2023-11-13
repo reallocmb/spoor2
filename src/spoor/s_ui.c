@@ -8,6 +8,8 @@
 #include<unistd.h>
 #include<sys/ioctl.h>
 
+#include<graphapp.h>
+
 const char UI_TYPES[][17] = {
     "TASK",
     "PROJECT",
@@ -78,8 +80,6 @@ void title_format_parse(char *title, char *title_format)
     }
     else
         strcpy(title_format, title);
-    title_format[29] = 0;
-
 }
 
 void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format)
@@ -131,18 +131,6 @@ void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format)
     }
 }
 
-#ifdef UI_GRAPHAPP
-
-void spoor_ui_object_show(void)
-{
-    App *app = app_new_app(0, NULL);
-    Window *window = app_new_window(app, rect(0, 0, 500, 300), "SPOOR", STANDARD_WINDOW);
-
-    app_show_window(window);
-
-    app_main_loop(app);
-}
-#else
 void spoor_ui_object_show(void)
 {
 #if 0
@@ -280,6 +268,7 @@ void spoor_ui_object_show(void)
                     printf("--- HELP PAGE ---\n");
                     printf("commands:\n"
                             ":c[title],[deadline] [schedule] [status || type]\t\tcreate object\n"
+                            "link: l[parent_index]\n"
                             "type: t = TASK\n"
                             "type: e = EVENT\n"
                             "type: a = APPOINTMENT\n"
@@ -288,7 +277,7 @@ void spoor_ui_object_show(void)
                             "status: c = COMPLETED\n"
                             "status: ip = IN PROGRESS\n"
                             "status: ns = NOT STARTED\n"
-                            ":[index] [title],[deadline] [schedule] [status || type]\t\tedit object by index");
+                            ":[index]e [title],[deadline] [schedule] [status || type]\t\tedit object by index");
                     getchar();
                 }
                 else
@@ -377,4 +366,3 @@ void spoor_ui_object_show(void)
     tcsetattr(STDIN_FILENO, TCSANOW, &old);
 #endif
 }
-#endif

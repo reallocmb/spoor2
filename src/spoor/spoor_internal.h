@@ -93,5 +93,8 @@ void spoor_object_children_append(SpoorObject *spoor_object_head, SpoorObject *s
 void spoor_object_children_append_edit(SpoorObject *spoor_object_head, SpoorObject *spoor_object, SpoorObject *old);
 void spoor_storage_object_append(SpoorObject *spoor_object_parent, SpoorObject *spoor_object);
 void spoor_storage_object_remove(SpoorObject *spoor_object);
+void title_format_parse(char *title, char *title_format);
+void time_format_parse_deadline(SpoorTime *spoor_time, char *time_format);
+void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format);
 
 #endif

@@ -1,6 +1,6 @@
 program = spoor
 
-extern_lib = 
+extern_lib = -lX11 -lc -lm -lpng -lapp
 
 compiler = gcc $(develop_flags)
 
@@ -40,6 +40,9 @@ $(objdirs):
 
 run: all
 	./$(binary)
+
+rung: all
+	./$(binary) --gui
 
 gdb:
 	gdb ./$(binary)
