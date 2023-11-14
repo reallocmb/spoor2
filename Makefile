@@ -1,6 +1,6 @@
 program = spoor
 
-extern_lib = -lX11 -lc -lm -lpng -lapp
+extern_lib = -lc -lpng -lapp -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lraygui
 
 compiler = gcc $(develop_flags)
 
@@ -30,10 +30,10 @@ objdirs = $(patsubst src/%,obj/%,$(sub_dirs))
 all: $(objdirs) $(object_all) $(binary)
 
 $(binary): $(object_all)
-	$(compiler) -o $(binary) $(object_all) $(extern_lib)
+	$(compiler) -Llib -o $(binary) $(object_all) $(extern_lib)
 
 $(object_dir)/%.o: $(source_dir)/%.c
-	$(compiler) -c -o $@ $<
+	$(compiler) -Iinc -c -o $@ $<
 
 $(objdirs):
 	@mkdir -p $@

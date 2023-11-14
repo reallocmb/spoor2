@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     if (argc <= 1)
         spoor_ui_object_show();
     else if (strcmp(argv[1], "--gui") == 0)
-        spoor_ui_graphapp_object_show();
+        spoor_ui_raylib_object_show();
     else if (strcmp(argv[1], "-v") == 0)
     {
         printf("SPOOR VERSION: %d.%d.%d\n", SPOOR_VERSION_MAJOR, SPOOR_VERSION_MINOR, SPOOR_VERSION_PATCH);

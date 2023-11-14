@@ -43,7 +43,7 @@ void day_draw(Control *c, Graphics *g, char *name, uint32_t width, uint32_t day_
     }
 }
 
-char ui_day_names[7][10] = {
+char ui_day_names_g[7][10] = {
     "Monday",
     "Tuesday",
     "Wednesday",
@@ -53,14 +53,14 @@ char ui_day_names[7][10] = {
     "Sunday",
 };
 
-uint32_t ui_day_names_count = 7;
+uint32_t ui_day_names_count_g = 7;
 
 void ui_day_names_draw(Control *c, Graphics *g)
 {
-    int day_width = c->area.width / ui_day_names_count;
+    int day_width = c->area.width / ui_day_names_count_g;
     int i;
-    for (i = 0; i < (int)ui_day_names_count; i++)
-        day_draw(c, g, ui_day_names[i], day_width, i);
+    for (i = 0; i < (int)ui_day_names_count_g; i++)
+        day_draw(c, g, ui_day_names_g[i], day_width, i);
 }
 
 void window_redraw_func(Window *w, Graphics *g)
@@ -81,7 +81,7 @@ void week_control_redraw_func(Control *c, Graphics *g)
     app_draw_rect(g, rect(0, 0, c->area.width, c->area.height));
 
     ui_day_names_draw(c, g);
-    int day_width = c->area.width / ui_day_names_count;
+    int day_width = c->area.width / ui_day_names_count_g;
 
     int i;
     for (i = 0; i < (int)spoor_objects_count; i++)
@@ -132,13 +132,13 @@ void scroll(Control *c, unsigned long key)
 {
     if (key == 'b')
     {
-        ui_day_names_count--;
+        ui_day_names_count_g--;
         app_redraw_control(c);
     }
 
     if (key == 'm')
     {
-        ui_day_names_count++;
+        ui_day_names_count_g++;
         app_redraw_control(c);
     }
 
