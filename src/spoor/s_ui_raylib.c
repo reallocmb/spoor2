@@ -22,7 +22,17 @@ typedef struct {
 
 #define CHILDS_ALLOC_SIZE 5
 
+#define LAYOUT_TYPE_DEFAULT 0b0
+#define LAYOUT_TYPE_GRID 0b1
+#define LAYOUT_TYPE_GRID_CHILD 0b10
+#define LAYOUT_TYPE_STACK_VERTICAL 0b100
+#define LAYOUT_TYPE_STACK_VERTICAL_CHILD 0b1000
+#define LAYOUT_TYPE_STACK_HORIZONTAL 0b10000
+#define LAYOUT_TYPE_STACK_HORIZONTAL_CHILD 0b100000
+
+
 enum {
+    LAYOUT_TYPE_DEFAULT,
     LAYOUT_TYPE_GRID,
     LAYOUT_TYPE_STACK_VERTICAL,
     LAYOUT_TYPE_STACK_HORIZONTAL,
@@ -43,7 +53,7 @@ typedef struct UIContainer {
     UIVector2 position;
     UIVector2 size;
     uint32_t height;
-    uint32_t layout_type;
+    uint16_t layout_type;
     union {
         UILayoutGrid layout_grid;
         UILayoutStack layout_stack;
@@ -58,7 +68,7 @@ UIContainer *ui_container_create(void)
     UIContainer *ui_container = malloc(sizeof(*ui_container));
     ui_container->margin = (UIInsets){ 0, 0, 0, 0};
     ui_container->position = (UIVector2){ 0, 0 };
-    ui_container->size = (UIVector2){ 0, 0 };
+    ui_container->size = (UIVector2){ SIZE_MAX_GROW, SIZE_MAX_GROW};
     ui_container->layout_type = 0;
     ui_container->draw_func = NULL;
     ui_container->childs = NULL;
@@ -80,19 +90,46 @@ UIContainer *ui_container_child_append(UIContainer *ui_container)
     return &ui_container->childs[ui_container->childs_count++];
 }
 
-void ui_container_draw(UIContainer *para)
+void ui_container_grid_set(UIContainer *ui_container)
+{
+}
+
+void ui_container_draw(UIContainer *ui_container)
+{
+    uint32_t i;
+    for (i = 0; i < ui_container->childs_count; i++)
+    {
+        if (ui_container->childs[i].draw_func != NULL)
+            ui_container->childs[i].draw_func(&ui_container->childs[i]);
+        ui_container_draw(&ui_container->childs[i]);
+    }
+}
+
+void childs_size_set(UIContainer *childs, uint32_t childs_count)
+{
+}
+
+void ui_container_child_resize_update(UIContainer *para)
 {
     uint32_t i;
     for (i = 0; i < para->childs_count; i++)
     {
-        if (para->childs[i].draw_func != NULL)
-            para->childs[i].draw_func(&para->childs[i]);
-        ui_container_draw(&para->childs[i]);
+        if (para->childs[i].layout_type | LAYOUT_TYPE_STACK_VERTICAL_CHILD)
+            para->childs[i].size.y = para->size.y / para->childs_count;
+        ui_container_child_resize_update(&para->childs[i]);
     }
 }
 
-void ui_container_resize(UIContainer *para)
+void ui_container_resize_update(UIContainer *para)
 {
+    para->size = (UIVector2){ GetScreenWidth(), GetScreenHeight() };
+    uint32_t i;
+    for (i = 0; i < para->childs_count; i++)
+    {
+        if (para->childs[i].layout_type | LAYOUT_TYPE_STACK_VERTICAL_CHILD)
+            para->childs[i].size.y = para->size.y / para->childs_count;
+        ui_container_child_resize_update(&para->childs[i]);
+    }
 }
 
 char ui_day_names[7][10] = {
@@ -162,6 +199,16 @@ void main_page_draw_func(UIContainer *ui_container)
 #endif
 }
 
+void container_draw_func_test(UIContainer *ui_container)
+{
+    uint32_t margin = 2;
+    DrawRectangleLines(ui_container->margin.left + margin,
+            ui_container->margin.top + margin,
+            ui_container->size.x - 2 * margin,
+            ui_container->size.y - 2 * margin,
+            BLACK);
+}
+
 void list_page_draw_func(UIContainer *ui_container)
 {
     DrawRectangleLines(ui_container->margin.left,
@@ -181,13 +228,17 @@ void spoor_ui_raylib_object_show(void)
 
     SetTargetFPS(60);
 
-    UIContainer *ui_container_head = ui_container_create();
-    ui_container_head->layout_type = LAYOUT_TYPE_GRID;
-    UIContainer *ui_container_child = ui_container_child_append(ui_container_head);
-    ui_container_child->size.x = 500;
-    ui_container_child->size.y = 200;
-    ui_container_child->draw_func = main_page_draw_func;
-    ui_container_child = ui_container_child_append(ui_container_head);
+    UIContainer *ui_container_window = ui_container_create();
+    ui_container_window->layout_type |= LAYOUT_TYPE_STACK_VERTICAL;
+    UIContainer *ui_container_child = ui_container_child_append(ui_container_window);
+    ui_container_child->draw_func = container_draw_func_test;
+    ui_container_child->layout_type |= LAYOUT_TYPE_STACK_VERTICAL_CHILD;
+    ui_container_child = ui_container_child_append(ui_container_window);
+    ui_container_child->draw_func = container_draw_func_test;
+    ui_container_child->layout_type |= LAYOUT_TYPE_STACK_VERTICAL_CHILD;
+    ui_container_child->size.y = 20;
+
+    ui_container_resize_update(ui_container_window);
 
 
     /* load font */
@@ -199,11 +250,10 @@ void spoor_ui_raylib_object_show(void)
         {
             ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR))); 
 
-            ui_container_draw(ui_container_head);
+            ui_container_draw(ui_container_window);
             /* Pages */
-            /*
             if (IsWindowResized())
-            */
+                ui_container_resize_update(ui_container_window);
             /* Main Page */
         }
         EndDrawing();

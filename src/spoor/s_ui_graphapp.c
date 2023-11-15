@@ -1,3 +1,4 @@
+#if 0
 #include"spoor_internal.h"
 
 #include<stdio.h>
@@ -178,3 +179,4 @@ void spoor_ui_graphapp_object_show(void)
 
     app_main_loop(app);
 }
+#endif

@@ -8,8 +8,6 @@
 #include<unistd.h>
 #include<sys/ioctl.h>
 
-#include<graphapp.h>
-
 const char UI_TYPES[][17] = {
     "TASK",
     "PROJECT",
