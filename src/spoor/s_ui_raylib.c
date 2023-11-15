@@ -30,14 +30,6 @@ typedef struct {
 #define LAYOUT_TYPE_STACK_HORIZONTAL 0b10000
 #define LAYOUT_TYPE_STACK_HORIZONTAL_CHILD 0b100000
 
-
-enum {
-    LAYOUT_TYPE_DEFAULT,
-    LAYOUT_TYPE_GRID,
-    LAYOUT_TYPE_STACK_VERTICAL,
-    LAYOUT_TYPE_STACK_HORIZONTAL,
-};
-
 typedef struct {
     uint32_t *rows;
     uint32_t rows_count;
@@ -68,7 +60,7 @@ UIContainer *ui_container_create(void)
     UIContainer *ui_container = malloc(sizeof(*ui_container));
     ui_container->margin = (UIInsets){ 0, 0, 0, 0};
     ui_container->position = (UIVector2){ 0, 0 };
-    ui_container->size = (UIVector2){ SIZE_MAX_GROW, SIZE_MAX_GROW};
+    ui_container->size = (UIVector2){ 0, 0};
     ui_container->layout_type = 0;
     ui_container->draw_func = NULL;
     ui_container->childs = NULL;
@@ -105,18 +97,16 @@ void ui_container_draw(UIContainer *ui_container)
     }
 }
 
-void childs_size_set(UIContainer *childs, uint32_t childs_count)
-{
-}
-
 void ui_container_child_resize_update(UIContainer *para)
 {
     uint32_t i;
     for (i = 0; i < para->childs_count; i++)
     {
         if (para->childs[i].layout_type | LAYOUT_TYPE_STACK_VERTICAL_CHILD)
+        {
             para->childs[i].size.y = para->size.y / para->childs_count;
-        ui_container_child_resize_update(&para->childs[i]);
+            para->childs[i].position.y = para->size.y / para->childs_count * i;
+        }
     }
 }
 
@@ -126,9 +116,12 @@ void ui_container_resize_update(UIContainer *para)
     uint32_t i;
     for (i = 0; i < para->childs_count; i++)
     {
+        para->childs[i].size = para->size;
         if (para->childs[i].layout_type | LAYOUT_TYPE_STACK_VERTICAL_CHILD)
+        {
             para->childs[i].size.y = para->size.y / para->childs_count;
-        ui_container_child_resize_update(&para->childs[i]);
+            para->childs[i].position.y = para->size.y / para->childs_count * i;
+        }
     }
 }
 
@@ -202,8 +195,9 @@ void main_page_draw_func(UIContainer *ui_container)
 void container_draw_func_test(UIContainer *ui_container)
 {
     uint32_t margin = 2;
-    DrawRectangleLines(ui_container->margin.left + margin,
-            ui_container->margin.top + margin,
+    DrawRectangleLines(
+            ui_container->position.x + margin,
+            ui_container->position.y + margin,
             ui_container->size.x - 2 * margin,
             ui_container->size.y - 2 * margin,
             BLACK);
@@ -216,6 +210,14 @@ void list_page_draw_func(UIContainer *ui_container)
             ui_container->size.x,
             ui_container->size.y,
             BLACK);
+}
+
+void test(UIContainer *ptr)
+{
+    UIContainer *ui_container_child = ui_container_child_append(ptr);
+    ui_container_child->draw_func = container_draw_func_test;
+    ui_container_child->layout_type |= LAYOUT_TYPE_STACK_VERTICAL_CHILD;
+    ui_container_resize_update(ptr);
 }
 
 void spoor_ui_raylib_object_show(void)
@@ -233,10 +235,6 @@ void spoor_ui_raylib_object_show(void)
     UIContainer *ui_container_child = ui_container_child_append(ui_container_window);
     ui_container_child->draw_func = container_draw_func_test;
     ui_container_child->layout_type |= LAYOUT_TYPE_STACK_VERTICAL_CHILD;
-    ui_container_child = ui_container_child_append(ui_container_window);
-    ui_container_child->draw_func = container_draw_func_test;
-    ui_container_child->layout_type |= LAYOUT_TYPE_STACK_VERTICAL_CHILD;
-    ui_container_child->size.y = 20;
 
     ui_container_resize_update(ui_container_window);
 
@@ -244,21 +242,30 @@ void spoor_ui_raylib_object_show(void)
     /* load font */
     font_liberation = LoadFontEx("LiberationMono-Regular.ttf", 32, 0, 250);
 
+    _Bool leader = 0;
     while (!WindowShouldClose())
     {
         BeginDrawing();
         {
             ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR))); 
 
-            ui_container_draw(ui_container_window);
-            /* Pages */
             if (IsWindowResized())
                 ui_container_resize_update(ui_container_window);
-            /* Main Page */
+
+            ui_container_draw(ui_container_window);
         }
         EndDrawing();
 
         char c = GetCharPressed();
+        if (leader)
+        {
+            if (c == 'i')
+            {
+                test(ui_container_window);
+                leader = 0;
+            }
+        }
+
         switch (c)
         {
             case 'n':
@@ -266,6 +273,11 @@ void spoor_ui_raylib_object_show(void)
                 break;
             case 'r':
                 ui_day_names_count++;
+                break;
+            case ' ':
+                leader = 1;
+                printf("test\n");
+                break;
         }
     }
 
