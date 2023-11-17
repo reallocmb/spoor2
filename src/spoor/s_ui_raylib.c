@@ -122,6 +122,11 @@ void ui_container_resize_update(UIContainer *para)
             para->childs[i].size.y = para->size.y / para->childs_count;
             para->childs[i].position.y = para->size.y / para->childs_count * i;
         }
+
+        if (para->childs[i].layout_type | LAYOUT_TYPE_STACK_HORIZONTAL_CHILD)
+        {
+            para->childs[i].size.x = para->size.x / para->childs_count;
+        }
     }
 }
 
@@ -257,6 +262,8 @@ void spoor_ui_raylib_object_show(void)
         EndDrawing();
 
         char c = GetCharPressed();
+        int key = GetKeyPressed();
+        printf("key: %d\nchar: %c\n");
         if (leader)
         {
             if (c == 'i')
@@ -264,6 +271,27 @@ void spoor_ui_raylib_object_show(void)
                 test(ui_container_window);
                 leader = 0;
             }
+
+            if (key == KEY_S)
+            {
+                test(ui_container_window);
+                leader = 0;
+            }
+         
+        }
+
+        switch (key)
+        {
+            case KEY_J:
+                ui_day_names_count--;
+                break;
+            case KEY_K:
+                ui_day_names_count++;
+                break;
+            case KEY_SPACE:
+                leader = 1;
+                printf("leader\n");
+                break;
         }
 
         switch (c)
