@@ -102,10 +102,17 @@ void ui_container_child_resize_update(UIContainer *para)
     uint32_t i;
     for (i = 0; i < para->childs_count; i++)
     {
-        if (para->childs[i].layout_type | LAYOUT_TYPE_STACK_VERTICAL_CHILD)
+        para->childs[i].size = para->size;
+        if (para->layout_type & LAYOUT_TYPE_STACK_VERTICAL)
         {
             para->childs[i].size.y = para->size.y / para->childs_count;
             para->childs[i].position.y = para->size.y / para->childs_count * i;
+        }
+
+        if (para->layout_type & LAYOUT_TYPE_STACK_HORIZONTAL)
+        {
+            para->childs[i].size.x = para->size.x / para->childs_count;
+            para->childs[i].position.x = para->size.x / para->childs_count * i;
         }
     }
 }
@@ -117,16 +124,19 @@ void ui_container_resize_update(UIContainer *para)
     for (i = 0; i < para->childs_count; i++)
     {
         para->childs[i].size = para->size;
-        if (para->childs[i].layout_type | LAYOUT_TYPE_STACK_VERTICAL_CHILD)
+        if (para->layout_type & LAYOUT_TYPE_STACK_VERTICAL)
         {
             para->childs[i].size.y = para->size.y / para->childs_count;
             para->childs[i].position.y = para->size.y / para->childs_count * i;
         }
 
-        if (para->childs[i].layout_type | LAYOUT_TYPE_STACK_HORIZONTAL_CHILD)
+        if (para->layout_type & LAYOUT_TYPE_STACK_HORIZONTAL)
         {
             para->childs[i].size.x = para->size.x / para->childs_count;
+            para->childs[i].position.x = para->size.x / para->childs_count * i;
         }
+
+        ui_container_child_resize_update(&para->childs[i]);
     }
 }
 
@@ -217,11 +227,11 @@ void list_page_draw_func(UIContainer *ui_container)
             BLACK);
 }
 
-void test(UIContainer *ptr)
+void test(UIContainer *ptr, uint32_t layout_type)
 {
     UIContainer *ui_container_child = ui_container_child_append(ptr);
     ui_container_child->draw_func = container_draw_func_test;
-    ui_container_child->layout_type |= LAYOUT_TYPE_STACK_VERTICAL_CHILD;
+    ui_container_child->layout_type |= layout_type;
     ui_container_resize_update(ptr);
 }
 
@@ -236,10 +246,8 @@ void spoor_ui_raylib_object_show(void)
     SetTargetFPS(60);
 
     UIContainer *ui_container_window = ui_container_create();
-    ui_container_window->layout_type |= LAYOUT_TYPE_STACK_VERTICAL;
     UIContainer *ui_container_child = ui_container_child_append(ui_container_window);
     ui_container_child->draw_func = container_draw_func_test;
-    ui_container_child->layout_type |= LAYOUT_TYPE_STACK_VERTICAL_CHILD;
 
     ui_container_resize_update(ui_container_window);
 
@@ -262,24 +270,36 @@ void spoor_ui_raylib_object_show(void)
         EndDrawing();
 
         char c = GetCharPressed();
+#if 0
         int key = GetKeyPressed();
-        printf("key: %d\nchar: %c\n");
+#endif
         if (leader)
         {
             if (c == 'i')
             {
-                test(ui_container_window);
+                ui_container_window->layout_type = LAYOUT_TYPE_STACK_VERTICAL;
+                test(ui_container_window, LAYOUT_TYPE_STACK_VERTICAL);
                 leader = 0;
             }
 
+            if (c == 'a')
+            {
+                ui_container_window->layout_type = LAYOUT_TYPE_STACK_HORIZONTAL;
+                test(ui_container_window, LAYOUT_TYPE_STACK_HORIZONTAL);
+                leader = 0;
+            }
+
+#if 0
             if (key == KEY_S)
             {
                 test(ui_container_window);
                 leader = 0;
             }
+#endif
          
         }
 
+#if 0
         switch (key)
         {
             case KEY_J:
@@ -290,9 +310,9 @@ void spoor_ui_raylib_object_show(void)
                 break;
             case KEY_SPACE:
                 leader = 1;
-                printf("leader\n");
                 break;
         }
+#endif
 
         switch (c)
         {
@@ -304,11 +324,9 @@ void spoor_ui_raylib_object_show(void)
                 break;
             case ' ':
                 leader = 1;
-                printf("test\n");
                 break;
         }
     }
 
     CloseWindow();
-
 }
