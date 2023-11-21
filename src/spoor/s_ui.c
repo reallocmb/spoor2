@@ -142,7 +142,7 @@ void spoor_ui_object_show(void)
     {
         spoor_debug_spoor_object_print(&spoor_objects[i]);
     }
-    
+
 #else
     struct termios old;
     struct termios new;
@@ -265,17 +265,17 @@ void spoor_ui_object_show(void)
                     cursor_move(0, 0);
                     printf("--- HELP PAGE ---\n");
                     printf("commands:\n"
-                            ":c[title],[deadline] [schedule] [status || type]\t\tcreate object\n"
-                            "link: l[parent_index]\n"
-                            "type: t = TASK\n"
-                            "type: e = EVENT\n"
-                            "type: a = APPOINTMENT\n"
-                            "type: g = GOAL\n"
-                            "type: h = HABIT\n"
-                            "status: c = COMPLETED\n"
-                            "status: ip = IN PROGRESS\n"
-                            "status: ns = NOT STARTED\n"
-                            ":[index]e [title],[deadline] [schedule] [status || type]\t\tedit object by index");
+                           ":c[title],[deadline] [schedule] [status || type]\t\tcreate object\n"
+                           "link: l[parent_index]\n"
+                           "type: t = TASK\n"
+                           "type: e = EVENT\n"
+                           "type: a = APPOINTMENT\n"
+                           "type: g = GOAL\n"
+                           "type: h = HABIT\n"
+                           "status: c = COMPLETED\n"
+                           "status: ip = IN PROGRESS\n"
+                           "status: ns = NOT STARTED\n"
+                           ":[index]e [title],[deadline] [schedule] [status || type]\t\tedit object by index");
                     getchar();
                 }
                 else

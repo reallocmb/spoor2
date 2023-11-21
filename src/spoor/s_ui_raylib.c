@@ -40,12 +40,16 @@ typedef struct {
 typedef struct {
 } UILayoutStack;
 
+/* UIContainer flags */
+#define UI_CONTAINER_FLAG_SELECTED 0b1
+
 typedef struct UIContainer {
     UIInsets margin;
     UIVector2 position;
     UIVector2 size;
     uint32_t height;
     uint16_t layout_type;
+    uint16_t flags;
     union {
         UILayoutGrid layout_grid;
         UILayoutStack layout_stack;
@@ -62,6 +66,7 @@ UIContainer *ui_container_create(void)
     ui_container->position = (UIVector2){ 0, 0 };
     ui_container->size = (UIVector2){ 0, 0};
     ui_container->layout_type = 0;
+    ui_container->flags = 0;
     ui_container->draw_func = NULL;
     ui_container->childs = NULL;
     ui_container->childs_count = 0;
@@ -80,6 +85,11 @@ UIContainer *ui_container_child_append(UIContainer *ui_container)
     free(ui_container_child);
 
     return &ui_container->childs[ui_container->childs_count++];
+}
+
+void ui_container_select(UIContainer *ui_container)
+{
+    ui_container->flags |= UI_CONTAINER_FLAG_SELECTED;
 }
 
 void ui_container_grid_set(UIContainer *ui_container)
@@ -209,13 +219,16 @@ void main_page_draw_func(UIContainer *ui_container)
 
 void container_draw_func_test(UIContainer *ui_container)
 {
+    Color border_color = BLACK;
+    if (ui_container->flags & UI_CONTAINER_FLAG_SELECTED)
+        border_color = GREEN;
     uint32_t margin = 2;
     DrawRectangleLines(
             ui_container->position.x + margin,
             ui_container->position.y + margin,
             ui_container->size.x - 2 * margin,
             ui_container->size.y - 2 * margin,
-            BLACK);
+            border_color);
 }
 
 void list_page_draw_func(UIContainer *ui_container)
@@ -227,12 +240,19 @@ void list_page_draw_func(UIContainer *ui_container)
             BLACK);
 }
 
-void test(UIContainer *ptr, uint32_t layout_type)
+UIContainer *test(UIContainer *ptr, UIContainer **selected, uint32_t layout_type)
 {
     UIContainer *ui_container_child = ui_container_child_append(ptr);
     ui_container_child->draw_func = container_draw_func_test;
-    ui_container_child->layout_type |= layout_type;
+
+    ptr->layout_type = layout_type;
+    (*selected)->flags = 0;
+    ui_container_child->flags |= UI_CONTAINER_FLAG_SELECTED;
+    *selected = ui_container_child;
+
     ui_container_resize_update(ptr);
+
+    return ui_container_child;
 }
 
 void spoor_ui_raylib_object_show(void)
@@ -245,11 +265,15 @@ void spoor_ui_raylib_object_show(void)
 
     SetTargetFPS(60);
 
+    UIContainer *ptr;
+    UIContainer *ui_container_selected;
     UIContainer *ui_container_window = ui_container_create();
     UIContainer *ui_container_child = ui_container_child_append(ui_container_window);
     ui_container_child->draw_func = container_draw_func_test;
 
     ui_container_resize_update(ui_container_window);
+    ptr = ui_container_window;
+    ui_container_selected = ui_container_window;
 
 
     /* load font */
@@ -260,7 +284,7 @@ void spoor_ui_raylib_object_show(void)
     {
         BeginDrawing();
         {
-            ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR))); 
+            ClearBackground(DARKGREEN);
 
             if (IsWindowResized())
                 ui_container_resize_update(ui_container_window);
@@ -277,15 +301,19 @@ void spoor_ui_raylib_object_show(void)
         {
             if (c == 'i')
             {
+                if (ptr->layout_type == LAYOUT_TYPE_STACK_HORIZONTAL)
+                    ptr = ui_container_selected;
                 ui_container_window->layout_type = LAYOUT_TYPE_STACK_VERTICAL;
-                test(ui_container_window, LAYOUT_TYPE_STACK_VERTICAL);
+                test(ptr, &ui_container_selected, LAYOUT_TYPE_STACK_VERTICAL);
                 leader = 0;
             }
 
             if (c == 'a')
             {
+                if (ptr->layout_type == LAYOUT_TYPE_STACK_VERTICAL)
+                    ptr = ui_container_selected;
                 ui_container_window->layout_type = LAYOUT_TYPE_STACK_HORIZONTAL;
-                test(ui_container_window, LAYOUT_TYPE_STACK_HORIZONTAL);
+                test(ptr, &ui_container_selected, LAYOUT_TYPE_STACK_HORIZONTAL);
                 leader = 0;
             }
 
