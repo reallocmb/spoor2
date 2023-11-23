@@ -4,9 +4,14 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include<string.h>
-#include<termios.h>
 #include<unistd.h>
+#if defined(_WIN32)
+#include<windows.h>
+#endif
+#ifdef __unix__
+#include<termios.h>
 #include<sys/ioctl.h>
+#endif
 
 const char UI_TYPES[][17] = {
     "TASK",
@@ -129,6 +134,21 @@ void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format)
     }
 }
 
+void ui_window_rows_get(uint32_t *window_rows)
+{
+#ifdef __unix__
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+#elif defined(_WIN32)
+    HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    GetConsoleScreenBufferInfo(h_console, &csbi);
+
+    *window_rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+#endif
+}
+
 void spoor_ui_object_show(void)
 {
 #if 0
@@ -144,6 +164,7 @@ void spoor_ui_object_show(void)
     }
 
 #else
+#ifndef _WIN32
     struct termios old;
     struct termios new;
 
@@ -153,6 +174,7 @@ void spoor_ui_object_show(void)
     new.c_cc[VMIN] = 1;
     new.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &new);
+#endif
 
     SpoorFilter spoor_filter;
     spoor_filter.spoor_time.start.tm_year = 123;
@@ -177,9 +199,8 @@ void spoor_ui_object_show(void)
     spoor_objects_count = spoor_object_storage_load_filter_time_span(spoor_objects, &spoor_span);
 #endif
 
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    uint32_t window_rows = w.ws_row;
+    uint32_t window_rows = 0;
+    ui_window_rows_get(&window_rows);
 
     uint32_t offset = 0;
 
@@ -191,9 +212,9 @@ void spoor_ui_object_show(void)
     {
         /* sorting */
         spoor_sort_objects_by_deadline(spoor_objects, spoor_objects_count);
+
         /* window size update */
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-        window_rows = w.ws_row;
+        ui_window_rows_get(&window_rows);
 
         /* print title bar */
         cursor_move(0, 0);
@@ -359,8 +380,10 @@ void spoor_ui_object_show(void)
     }
     cursor_show();
 
+#if defined(__linux__)
     printf("\e[m");
     fflush(stdout);
     tcsetattr(STDIN_FILENO, TCSANOW, &old);
+#endif
 #endif
 }

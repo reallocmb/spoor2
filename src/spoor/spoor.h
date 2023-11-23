@@ -38,4 +38,6 @@ void spoor_debug_spoor_object_print(SpoorObject *spoor_object); /* print an Spoo
 void spoor_debug_storage_print_all(SpoorDatabase *spoor_object);
 #endif
 
+uint32_t spoor_object_size_get(void);
+
 #endif

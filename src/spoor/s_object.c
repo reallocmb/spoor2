@@ -449,3 +449,8 @@ void spoor_object_schedule_set(SpoorObject *spoor_object, char *command)
         spoor_time_schedule_create(command, strlen(command), &spoor_object->schedule);
 }
 #endif
+
+uint32_t spoor_object_size_get(void)
+{
+    return sizeof(struct SpoorObject);
+}

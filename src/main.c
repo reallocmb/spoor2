@@ -1,26 +1,36 @@
 #define DEBUG
 
 #include"spoor/spoor.h"
-#include"redbas/redbas.h"
 
-#include<stdlib.h>
-#include<string.h>
 #include<stdio.h>
 #include<unistd.h>
 #include<sys/stat.h>
 
 int main(int argc, char **argv)
 {
+
+    printf("size %d\n", spoor_object_size_get());
+#if 0
     /* change current directory to database directory */
+#if _WIN32
+    char *home_directory = getenv("USERPROFILE");
+#else
     char *home_directory = getenv("HOME");
+#endif
+
     char *database_path = malloc((strlen(home_directory) + 7 + 1) * sizeof(*database_path));
+    printf("%s\n", home_directory);
 #ifdef RELEASE
     strcpy(database_path, home_directory);
     strcpy(database_path + strlen(home_directory), "/.spoor");
 #else 
     strcpy(database_path, ".spoor");
 #endif
+#if _WIN32
+    mkdir(database_path);
+#else
     mkdir(database_path, 0777);
+#endif
     chdir(database_path);
 
     free(database_path);
@@ -42,6 +52,7 @@ int main(int argc, char **argv)
         spoor_debug_spoor_object_print(spoor_object);
         free(spoor_object);
     }
+#endif
 
     return 0;
 }
