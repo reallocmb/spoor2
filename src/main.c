@@ -3,14 +3,14 @@
 #include"spoor/spoor.h"
 
 #include<stdio.h>
+#include<stdlib.h>
 #include<unistd.h>
 #include<sys/stat.h>
 
 int main(int argc, char **argv)
 {
 
-    printf("size %d\n", spoor_object_size_get());
-#if 0
+#if 1
     /* change current directory to database directory */
 #if _WIN32
     char *home_directory = getenv("USERPROFILE");
