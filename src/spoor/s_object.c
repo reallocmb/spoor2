@@ -333,11 +333,15 @@ bool spoor_object_edit(SpoorObject *spoor_object, char *arguments)
         }
     }
 
-    if (old.deadline.end.year == spoor_object->deadline.end.year &&
-            old.deadline.end.mon == spoor_object->deadline.end.mon)
-        return 1;
-    else
+    if (!(old.deadline.end.year == spoor_object->deadline.end.year &&
+            old.deadline.end.mon == spoor_object->deadline.end.mon))
+    {
+        spoor_storage_object_remove(&old);
+        spoor_storage_delete(&old);
         return 0;
+    }
+
+    return 1;
 }
 
 #if 0

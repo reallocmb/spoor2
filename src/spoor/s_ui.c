@@ -323,11 +323,7 @@ void spoor_ui_object_show(void)
                             spoor_storage_change(spoor_object);
                         }
                         else
-                        {
-                            spoor_storage_object_remove(spoor_object);
-                            spoor_storage_delete(spoor_object);
                             spoor_storage_save(spoor_objects, spoor_object);
-                        }
 
                         spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);
                     }

@@ -93,6 +93,7 @@ void spoor_storage_save(SpoorObject *spoor_objects, SpoorObject *spoor_object)
     redbas_db_close(db);
 }
 
+
 uint32_t spoor_object_storage_load(SpoorObject *spoor_objects, SpoorFilter *spoor_filter)
 {
     DIR *dir = opendir(".");
