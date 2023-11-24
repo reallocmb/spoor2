@@ -1,7 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdint.h>
-#include<io.h>
 
 typedef struct {
     FILE *f;
