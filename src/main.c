@@ -10,9 +10,6 @@
 
 int main(int argc, char **argv)
 {
-    printf("%d\n", spoor_object_size_get());
-
-#if 0
     /* change current directory to database directory */
 #if _WIN32
     char *home_directory = getenv("USERPROFILE");
@@ -54,7 +51,6 @@ int main(int argc, char **argv)
         spoor_debug_spoor_object_print(spoor_object);
         free(spoor_object);
     }
-#endif
 
     return 0;
 }
