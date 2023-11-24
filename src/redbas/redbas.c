@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdint.h>
+#include<io.h>
 
 typedef struct {
     FILE *f;
@@ -11,10 +12,10 @@ typedef struct {
 RedbasDB *redbas_db_open(char *path, uint32_t size)
 {
     RedbasDB *redbas_db = malloc(sizeof(*redbas_db));
-    redbas_db->f = fopen(path, "r");
+    redbas_db->f = fopen(path, "rb");
     if (redbas_db->f == NULL)
     {
-        redbas_db->f = fopen(path, "w+");
+        redbas_db->f = fopen(path, "w+b");
         if (redbas_db->f == NULL)
             return NULL;
         redbas_db->size = size;
@@ -22,13 +23,17 @@ RedbasDB *redbas_db_open(char *path, uint32_t size)
         redbas_db->items = 0;
         fwrite(&redbas_db->items, sizeof(redbas_db->items), 1, redbas_db->f);
         fclose(redbas_db->f);
-        redbas_db->f = fopen(path, "r+");
+        redbas_db->f = fopen(path, "r+b");
     }
     else
     {
         fclose(redbas_db->f);
-        redbas_db->f = fopen(path, "r+");
+        redbas_db->f = fopen(path, "r+b");
+        long currentPos = ftell(redbas_db->f);
+        printf("current pos%ld\n", currentPos);
         fread(&redbas_db->size, sizeof(redbas_db->size), 1, redbas_db->f);
+        currentPos = ftell(redbas_db->f);
+        printf("current pos%ld\n", currentPos);
         fread(&redbas_db->items, sizeof(redbas_db->items), 1, redbas_db->f);
     }
 
