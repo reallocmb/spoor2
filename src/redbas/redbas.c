@@ -29,11 +29,7 @@ RedbasDB *redbas_db_open(char *path, uint32_t size)
     {
         fclose(redbas_db->f);
         redbas_db->f = fopen(path, "r+b");
-        long currentPos = ftell(redbas_db->f);
-        printf("current pos%ld\n", currentPos);
         fread(&redbas_db->size, sizeof(redbas_db->size), 1, redbas_db->f);
-        currentPos = ftell(redbas_db->f);
-        printf("current pos%ld\n", currentPos);
         fread(&redbas_db->items, sizeof(redbas_db->items), 1, redbas_db->f);
     }
 
