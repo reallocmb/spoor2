@@ -1,14 +1,14 @@
 #include"spoor_internal.h"
 #include<stdlib.h>
 
-int64_t spoor_time_compare(struct tm *time1, struct tm *time2)
+int64_t spoor_time_compare(SpoorTime *time1, SpoorTime *time2)
 {
     int64_t result = 0;
-    result += ((time1->tm_year != -1) * time1->tm_year - (time2->tm_year != -1) * time2->tm_year) * 60 * 24 * 31 * 12;
-    result += ((time1->tm_mon != -1) * time1->tm_mon - (time2->tm_mon != -1) * time2->tm_mon) * 60 * 24 * 31;
-    result += ((time1->tm_mday != -1) * time1->tm_mday - (time2->tm_mday != -1) * time2->tm_mday) * 60 * 24;
-    result += ((time1->tm_hour != -1) * time1->tm_hour - (time2->tm_hour != -1) * time2->tm_hour) * 60;
-    result += ((time1->tm_min != -1) * time1->tm_min - (time2->tm_min != -1) * time2->tm_min);
+    result += ((time1->year != -1) * time1->year - (time2->year != -1) * time2->year) * 60 * 24 * 31 * 12;
+    result += ((time1->mon != -1) * time1->mon - (time2->mon != -1) * time2->mon) * 60 * 24 * 31;
+    result += ((time1->day != -1) * time1->day - (time2->day != -1) * time2->day) * 60 * 24;
+    result += ((time1->hour != -1) * time1->hour - (time2->hour != -1) * time2->hour) * 60;
+    result += ((time1->min != -1) * time1->min - (time2->min != -1) * time2->min);
 
     return result;
 }
@@ -30,7 +30,7 @@ void spoor_sort_objects_by_deadline(SpoorObject *spoor_objects, uint32_t spoor_o
 #if 0
     uint32_t i, j;
 
-    struct tm tmp;
+    SpoorTime tmp;
 
     for (i = 1; i < spoor_objects_count; i++)
     {

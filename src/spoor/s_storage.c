@@ -7,13 +7,13 @@
 
 void storage_db_path_clean(SpoorObject *spoor_object, char *db_path_clean)
 {
-    if (spoor_object->deadline.end.tm_year == -1)
+    if (spoor_object->deadline.end.year == -1)
     {
         strcpy(db_path_clean, "000000");
     }
     else
     {
-        uint32_t year = spoor_object->deadline.end.tm_year + 1900;
+        uint32_t year = spoor_object->deadline.end.year + 1900;
         db_path_clean[3] = year % 10 + 0x30;
         year /= 10;
         db_path_clean[2] = year % 10 + 0x30;
@@ -22,15 +22,15 @@ void storage_db_path_clean(SpoorObject *spoor_object, char *db_path_clean)
         year /= 10;
         db_path_clean[0] = year % 10 + 0x30;
 
-        if (spoor_object->deadline.end.tm_mon + 1 < 10)
+        if (spoor_object->deadline.end.mon + 1 < 10)
         {
             db_path_clean[4] = '0';
-            db_path_clean[5] = spoor_object->deadline.end.tm_mon + 1 + 0x30;
+            db_path_clean[5] = spoor_object->deadline.end.mon + 1 + 0x30;
         }
         else
         {
-            db_path_clean[4] = (spoor_object->deadline.end.tm_mon + 1) / 10 + 0x30;
-            db_path_clean[5] = (spoor_object->deadline.end.tm_mon + 1) % 10 + 0x30;
+            db_path_clean[4] = (spoor_object->deadline.end.mon + 1) / 10 + 0x30;
+            db_path_clean[5] = (spoor_object->deadline.end.mon + 1) % 10 + 0x30;
         }
     }
 
@@ -133,7 +133,7 @@ uint32_t spoor_object_storage_load(SpoorObject *spoor_objects, SpoorFilter *spoo
     return items_total;
 }
 
-uint32_t spoor_object_storage_load_filter_time_span(SpoorObject *spoor_objects, SpoorTime *spoor_time_span)
+uint32_t spoor_object_storage_load_filter_time_span(SpoorObject *spoor_objects, SpoorTimeSpan *spoor_time_span)
 {
     DIR *dir = opendir(".");
     struct dirent *ptr;

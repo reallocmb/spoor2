@@ -6,7 +6,9 @@
 #include<string.h>
 
 /* Input [count]['d'][time] */
-void spoor_time_date_create(char *argument, uint32_t argument_length, struct tm *date)
+void spoor_time_date_create(char *argument,
+                            uint32_t argument_length,
+                            SpoorTime *date)
 {
     char last_char = argument[argument_length];
     argument[argument_length] = 0;
@@ -45,7 +47,7 @@ void spoor_time_date_create(char *argument, uint32_t argument_length, struct tm 
     if (mode == 'd')
     {
         current_time += sign * 60 * 60 * 24 * (int32_t)count;
-        *date = *localtime(&current_time);
+        *date = *((SpoorTime *)localtime(&current_time));
     }
     else
     {
@@ -53,13 +55,13 @@ void spoor_time_date_create(char *argument, uint32_t argument_length, struct tm 
         hour = minute / 100;
         minute = minute % 100;
 
-        date->tm_hour = hour;
-        date->tm_min = minute;
+        date->hour = hour;
+        date->min = minute;
 
         if (!(hour >= 0 && hour <= 23 && minute >= 0 && minute <= 60))
         {
-            date->tm_hour = -1;
-            date->tm_min = -1;
+            date->hour = -1;
+            date->min = -1;
         }
 
         return;
@@ -78,25 +80,25 @@ void spoor_time_date_create(char *argument, uint32_t argument_length, struct tm 
         hour = minute / 100;
         minute = minute % 100;
 
-        date->tm_hour = hour;
-        date->tm_min = minute;
+        date->hour = hour;
+        date->min = minute;
     }
     else
     {
-        date->tm_hour = -1;
-        date->tm_min = -1;
+        date->hour = -1;
+        date->min = -1;
     }
 
     if (!(hour >= 0 && hour <= 23 && minute >= 0 && minute <= 60))
     {
-        date->tm_hour = -1;
-        date->tm_min = -1;
+        date->hour = -1;
+        date->min = -1;
     }
 
     argument[argument_length] = last_char;
 }
 
-void spoor_time_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time)
+void spoor_time_create(char *argument, uint32_t argument_length, SpoorTimeSpan *spoor_time)
 {
     char last_c = argument[argument_length];
     argument[argument_length] = 0;
@@ -245,7 +247,7 @@ SpoorObject *spoor_object_create(char *arguments)
     /* created time */
     time_t current_time;
     current_time = time(NULL);
-    spoor_object->created.start = *localtime(&current_time);
+    spoor_object->created.start = *((SpoorTime *)localtime(&current_time));
 
     /* parent */
     spoor_object->parent_title[0] = '-';
@@ -331,8 +333,8 @@ bool spoor_object_edit(SpoorObject *spoor_object, char *arguments)
         }
     }
 
-    if (old.deadline.end.tm_year == spoor_object->deadline.end.tm_year &&
-            old.deadline.end.tm_mon == spoor_object->deadline.end.tm_mon)
+    if (old.deadline.end.year == spoor_object->deadline.end.year &&
+            old.deadline.end.mon == spoor_object->deadline.end.mon)
         return 1;
     else
         return 0;
@@ -347,8 +349,8 @@ void spoor_object_children_append_edit(SpoorObject *spoor_object_head, SpoorObje
         spoor_object->child_id = 0xffffffff;
         spoor_object->child_id_next = 0xffffffff;
         strcpy(spoor_object->parent_title, spoor_object_head->title);
-        if (old->deadline.end.tm_year == spoor_object->deadline.end.tm_year &&
-                old->deadline.end.tm_mon == spoor_object->deadline.end.tm_mon)
+        if (old->deadline.end.year == spoor_object->deadline.end.year &&
+                old->deadline.end.mon == spoor_object->deadline.end.mon)
             spoor_storage_change(spoor_object);
         else
         {
@@ -368,8 +370,8 @@ void spoor_object_children_append_edit(SpoorObject *spoor_object_head, SpoorObje
         spoor_object->child_id_next = spoor_object_head->child_id;
         strcpy(spoor_object->child_location_next, spoor_object_head->child_location_next);
         strcpy(spoor_object->parent_title, spoor_object_head->title);
-        if (old->deadline.end.tm_year == spoor_object->deadline.end.tm_year &&
-                old->deadline.end.tm_mon == spoor_object->deadline.end.tm_mon)
+        if (old->deadline.end.year == spoor_object->deadline.end.year &&
+                old->deadline.end.mon == spoor_object->deadline.end.mon)
             spoor_storage_change(spoor_object);
         else
         {
@@ -433,7 +435,7 @@ void spoor_object_deadline_set(SpoorObject *spoor_object, char *command)
         command++;
 
     if (command[0] == 'r')
-        spoor_object->deadline.start.tm_year = -1;
+        spoor_object->deadline.start.year = -1;
     else
         spoor_time_schedule_create(command, strlen(command), &spoor_object->deadline);
 }
@@ -444,7 +446,7 @@ void spoor_object_schedule_set(SpoorObject *spoor_object, char *command)
         command++;
 
     if (command[0] == 'r')
-        spoor_object->schedule.start.tm_year = -1;
+        spoor_object->schedule.start.year = -1;
     else
         spoor_time_schedule_create(command, strlen(command), &spoor_object->schedule);
 }

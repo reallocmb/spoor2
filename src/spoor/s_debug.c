@@ -18,15 +18,15 @@ const char DEBUG_STATUS[][19] = {
     "STATUS_COMPLETED"
 };
 
-void spoor_time_hour_minute_format(char *format_buffer, struct tm *time)
+void spoor_time_hour_minute_format(char *format_buffer, SpoorTime *time)
 {
-    if (time->tm_hour == -1 || time->tm_min == -1)
+    if (time->hour == -1 || time->min == -1)
         sprintf(format_buffer, "--:--");
     else
     {
         sprintf(format_buffer, "%s%d:%s%d",
-                (time->tm_hour < 10) ?"0" :"", time->tm_hour,
-                (time->tm_min < 10) ?"0" : "", time->tm_min);
+                (time->hour < 10) ?"0" :"", time->hour,
+                (time->min < 10) ?"0" : "", time->min);
     }
 }
 
@@ -60,7 +60,7 @@ void spoor_time_day_format(char *format_buffer, int day)
                 (day < 10) ?"" :"", day);
 }
 
-void debug_spoor_time_print(SpoorTime *spoor_time)
+void debug_spoor_time_print(SpoorTimeSpan *spoor_time)
 {
     char format_buffer_hour_min_start[6];
     char format_buffer_hour_min_end[6];
@@ -74,14 +74,14 @@ void debug_spoor_time_print(SpoorTime *spoor_time)
     spoor_time_hour_minute_format(format_buffer_hour_min_start, &spoor_time->start);
     spoor_time_hour_minute_format(format_buffer_hour_min_end, &spoor_time->end);
 
-    spoor_time_year_format(format_buffer_year_start, spoor_time->start.tm_year);
-    spoor_time_year_format(format_buffer_year_end, spoor_time->end.tm_year);
+    spoor_time_year_format(format_buffer_year_start, spoor_time->start.year);
+    spoor_time_year_format(format_buffer_year_end, spoor_time->end.year);
 
-    spoor_time_mon_format(format_buffer_mon_start, spoor_time->start.tm_mon);
-    spoor_time_mon_format(format_buffer_mon_end, spoor_time->end.tm_mon);
+    spoor_time_mon_format(format_buffer_mon_start, spoor_time->start.mon);
+    spoor_time_mon_format(format_buffer_mon_end, spoor_time->end.mon);
 
-    spoor_time_day_format(format_buffer_day_start, spoor_time->start.tm_mday);
-    spoor_time_day_format(format_buffer_day_end, spoor_time->end.tm_mday);
+    spoor_time_day_format(format_buffer_day_start, spoor_time->start.day);
+    spoor_time_day_format(format_buffer_day_end, spoor_time->end.day);
 
     printf("%s.%s.%s %s - %s.%s.%s %s\n",
             format_buffer_day_start,

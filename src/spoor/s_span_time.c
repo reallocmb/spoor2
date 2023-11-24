@@ -2,7 +2,7 @@
 
 #include<string.h>
 
-void spoor_time_span_create(SpoorTime *spoor_time_span, char *command)
+void spoor_time_span_create(SpoorTimeSpan *spoor_time_span, char *command)
 {
     /* command */
     /* d-1w means today until next week */
@@ -42,7 +42,7 @@ void spoor_time_span_create(SpoorTime *spoor_time_span, char *command)
     if (mode == 'd')
         time_current += count * 60 * 60 * 24 * sign;
 
-    spoor_time_span->start = *localtime(&time_current);
+    spoor_time_span->start = *((SpoorTime *)localtime(&time_current));
 
     if (command[i] == '-')
     {
@@ -74,8 +74,8 @@ void spoor_time_span_create(SpoorTime *spoor_time_span, char *command)
         if (mode == 'd')
             time_current += count * 60 * 60 * 24 * sign;
 
-        spoor_time_span->end = *localtime(&time_current);
+        spoor_time_span->end = *(SpoorTime *)localtime(&time_current);
     }
     else
-        spoor_time_span->end.tm_year = -1;
+        spoor_time_span->end.year = -1;
 }

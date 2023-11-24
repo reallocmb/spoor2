@@ -48,9 +48,9 @@ void cursor_move(int x, int y)
     fprintf(stdout, "\033[%d;%dH", y, x);
 }
 
-void time_format_parse_deadline(SpoorTime *spoor_time, char *time_format)
+void time_format_parse_deadline(SpoorTimeSpan *spoor_time, char *time_format)
 {
-    if (spoor_time->end.tm_year == -1)
+    if (spoor_time->end.year == -1)
     {
         sprintf(time_format, "--.--.---- --:--");
         return;
@@ -58,19 +58,19 @@ void time_format_parse_deadline(SpoorTime *spoor_time, char *time_format)
 
     char time_format_start[6];
 
-    if (spoor_time->end.tm_hour == -1 || spoor_time->end.tm_min == -1)
+    if (spoor_time->end.hour == -1 || spoor_time->end.min == -1)
         sprintf(time_format_start, "--:--");
     else
         sprintf(time_format_start, "%s%d:%s%d",
-                (spoor_time->end.tm_hour < 10) ?"0" :"", spoor_time->end.tm_hour,
-                (spoor_time->end.tm_min < 10) ?"0" : "", spoor_time->end.tm_min);
+                (spoor_time->end.hour < 10) ?"0" :"", spoor_time->end.hour,
+                (spoor_time->end.min < 10) ?"0" : "", spoor_time->end.min);
 
     sprintf(time_format, "%s%d.%s%d.%d %s",
-            (spoor_time->end.tm_mday < 10) ?"0" :"",
-            spoor_time->end.tm_mday,
-            (spoor_time->end.tm_mon + 1 < 10) ?"0" :"",
-            spoor_time->end.tm_mon + 1,
-            spoor_time->end.tm_year + 1900,
+            (spoor_time->end.day < 10) ?"0" :"",
+            spoor_time->end.day,
+            (spoor_time->end.mon + 1 < 10) ?"0" :"",
+            spoor_time->end.mon + 1,
+            spoor_time->end.year + 1900,
             time_format_start);
 }
 
@@ -85,9 +85,9 @@ void title_format_parse(char *title, char *title_format)
         strcpy(title_format, title);
 }
 
-void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format)
+void time_format_parse_schedule(SpoorTimeSpan *spoor_time, char *time_format)
 {
-    if (spoor_time->end.tm_year == -1)
+    if (spoor_time->end.year == -1)
     {
         sprintf(time_format, "--.--.---- --:-- --:--");
         return;
@@ -96,39 +96,39 @@ void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format)
     char time_format_start[6] = { 0 };
     char time_format_end[6] = { 0 };
 
-    if (spoor_time->start.tm_hour == -1 || spoor_time->start.tm_min == -1)
+    if (spoor_time->start.hour == -1 || spoor_time->start.min == -1)
         sprintf(time_format_start, "--:--");
     else
         sprintf(time_format_start, "%s%d:%s%d",
-                (spoor_time->start.tm_hour < 10) ?"0" :"", spoor_time->start.tm_hour,
-                (spoor_time->start.tm_min < 10) ?"0" : "", spoor_time->start.tm_min);
+                (spoor_time->start.hour < 10) ?"0" :"", spoor_time->start.hour,
+                (spoor_time->start.min < 10) ?"0" : "", spoor_time->start.min);
 
-    if (spoor_time->end.tm_hour == -1 || spoor_time->end.tm_min == -1)
+    if (spoor_time->end.hour == -1 || spoor_time->end.min == -1)
         sprintf(time_format_end, "--:--");
     else
         sprintf(time_format_end, "%s%d:%s%d",
-                (spoor_time->end.tm_hour < 10) ?"0" :"", spoor_time->end.tm_hour,
-                (spoor_time->end.tm_min < 10) ?"0" : "", spoor_time->end.tm_min);
+                (spoor_time->end.hour < 10) ?"0" :"", spoor_time->end.hour,
+                (spoor_time->end.min < 10) ?"0" : "", spoor_time->end.min);
 
-    if (spoor_time->start.tm_year == -1)
+    if (spoor_time->start.year == -1)
     {
         sprintf(time_format, "%s%d.%s%d.%d %s %s",
-                (spoor_time->end.tm_mday < 10) ?"0" :"",
-                spoor_time->end.tm_mday,
-                (spoor_time->end.tm_mon + 1 < 10) ?"0" :"",
-                spoor_time->end.tm_mon + 1,
-                spoor_time->end.tm_year + 1900,
+                (spoor_time->end.day < 10) ?"0" :"",
+                spoor_time->end.day,
+                (spoor_time->end.mon + 1 < 10) ?"0" :"",
+                spoor_time->end.mon + 1,
+                spoor_time->end.year + 1900,
                 time_format_end,
                 time_format_end);
     }
     else
     {
         sprintf(time_format, "%s%d.%s%d.%d %s %s",
-                (spoor_time->start.tm_mday < 10) ?"0" :"",
-                spoor_time->start.tm_mday,
-                (spoor_time->start.tm_mon + 1 < 10) ?"0" :"",
-                spoor_time->start.tm_mon + 1,
-                spoor_time->start.tm_year + 1900,
+                (spoor_time->start.day < 10) ?"0" :"",
+                spoor_time->start.day,
+                (spoor_time->start.mon + 1 < 10) ?"0" :"",
+                spoor_time->start.mon + 1,
+                spoor_time->start.year + 1900,
                 time_format_start,
                 time_format_end);
     }
@@ -178,23 +178,23 @@ void spoor_ui_object_show(void)
 #endif
 
     SpoorFilter spoor_filter;
-    spoor_filter.spoor_time.start.tm_year = 123;
-    spoor_filter.spoor_time.start.tm_mon = 9;
-    spoor_filter.spoor_time.start.tm_mday = 22;
-    spoor_filter.spoor_time.start.tm_hour = -1;
-    spoor_filter.spoor_time.start.tm_min = -1;
+    spoor_filter.spoor_time.start.year = 123;
+    spoor_filter.spoor_time.start.mon = 9;
+    spoor_filter.spoor_time.start.day = 22;
+    spoor_filter.spoor_time.start.hour = -1;
+    spoor_filter.spoor_time.start.min = -1;
 
     spoor_filter.spoor_time.end = spoor_filter.spoor_time.start;
-    spoor_filter.spoor_time.end.tm_hour = -1;
-    spoor_filter.spoor_time.end.tm_min = -1;
+    spoor_filter.spoor_time.end.hour = -1;
+    spoor_filter.spoor_time.end.min = -1;
     SpoorObject spoor_objects[500];
     uint32_t spoor_objects_count = 0;
     spoor_objects_count = spoor_object_storage_load(spoor_objects, &spoor_filter);
 #if 0
-    SpoorTime spoor_span;
-    spoor_span.start.tm_year = 123;
-    spoor_span.start.tm_mon = 9;
-    spoor_span.start.tm_mday = 20;
+    SpoorTimeSpan spoor_span;
+    spoor_span.start.year = 123;
+    spoor_span.start.mon = 9;
+    spoor_span.start.day = 20;
 
     spoor_span.end = spoor_span.start;
     spoor_objects_count = spoor_object_storage_load_filter_time_span(spoor_objects, &spoor_span);

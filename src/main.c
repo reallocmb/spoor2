@@ -10,8 +10,9 @@
 
 int main(int argc, char **argv)
 {
+    printf("%d\n", spoor_object_size_get());
 
-#if 1
+#if 0
     /* change current directory to database directory */
 #if _WIN32
     char *home_directory = getenv("USERPROFILE");

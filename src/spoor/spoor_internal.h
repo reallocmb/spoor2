@@ -20,11 +20,19 @@ typedef enum {
     TYPE_HABIT,
 } SpoorType;
 
-typedef struct SpoorTime {
-    struct tm start;
-    struct tm end;
-    struct SpoorTime *next;
+typedef struct {
+    int32_t sec;
+    int32_t min;
+    int32_t hour;
+    int32_t day;
+    int32_t mon;
+    int32_t year;
 } SpoorTime;
+
+typedef struct {
+    SpoorTime start;
+    SpoorTime end;
+} SpoorTimeSpan;
 
 typedef struct {
     char parent_id[100];
@@ -37,11 +45,11 @@ typedef struct SpoorObject {
     uint32_t id;
     char title[250];
     char parent_title[250];
-    SpoorTime deadline;
-    SpoorTime schedule;
-    SpoorTime tracked;
-    SpoorTime complete;
-    SpoorTime created;
+    SpoorTimeSpan deadline;
+    SpoorTimeSpan schedule;
+    SpoorTimeSpan tracked;
+    SpoorTimeSpan complete;
+    SpoorTimeSpan created;
     SpoorStatus status;
     SpoorType type;
     uint32_t parent_id;
@@ -53,7 +61,7 @@ typedef struct SpoorObject {
 } SpoorObject;
 
 typedef struct {
-    SpoorTime spoor_time;
+    SpoorTimeSpan spoor_time;
 } SpoorFilter;
 
 typedef struct {
@@ -77,16 +85,16 @@ void spoor_object_schedule_set(SpoorObject *spoor_object, char *command);
 void spoor_object_deadline_set(SpoorObject *spoor_object, char *command);
 
 void spoor_storage_clean_up(void);
-uint32_t spoor_object_storage_load_filter_time_span(SpoorObject *spoor_objects, SpoorTime *time_span);
+uint32_t spoor_object_storage_load_filter_time_span(SpoorObject *spoor_objects, SpoorTimeSpan *time_span);
 
-void spoor_time_span_create(SpoorTime *spoor_time_span, char *command);
+void spoor_time_span_create(SpoorTimeSpan *spoor_time_span, char *command);
 
 /* sort */
-int64_t spoor_time_compare(struct tm *time1, struct tm *time2);
+int64_t spoor_time_compare(SpoorTime *time1, SpoorTime *time2);
 void spoor_sort_objects_by_title(SpoorObject *spoor_objects, uint32_t spoor_objects_count);
 void spoor_sort_objects_by_deadline(SpoorObject *spoor_objects, uint32_t spoor_objects_count);
 
-void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorTime *spoor_time);
+void spoor_time_deadline_create(char *argument, uint32_t argument_length, SpoorTimeSpan *spoor_time);
 
 void storage_db_path_clean(SpoorObject *spoor_object, char *db_path_clean);
 void spoor_object_children_append(SpoorObject *spoor_object_head, SpoorObject *spoor_object);
@@ -94,7 +102,7 @@ void spoor_object_children_append_edit(SpoorObject *spoor_object_head, SpoorObje
 void spoor_storage_object_append(SpoorObject *spoor_object_parent, SpoorObject *spoor_object);
 void spoor_storage_object_remove(SpoorObject *spoor_object);
 void title_format_parse(char *title, char *title_format);
-void time_format_parse_deadline(SpoorTime *spoor_time, char *time_format);
-void time_format_parse_schedule(SpoorTime *spoor_time, char *time_format);
+void time_format_parse_deadline(SpoorTimeSpan *spoor_time, char *time_format);
+void time_format_parse_schedule(SpoorTimeSpan *spoor_time, char *time_format);
 
 #endif
