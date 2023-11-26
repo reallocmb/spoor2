@@ -101,11 +101,11 @@ void test_ui_area_draw_func(UIArea *ui_area)
         border_color = VIOLET;
 
     uint32_t margin = 5;
-    DrawRectangleLines(ui_area->position.x + margin,
-                       ui_area->position.y + margin,
-                       ui_area->size.x - 2 * margin,
-                       ui_area->size.y - 2 * margin,
-                       border_color);
+    DrawRectangle(ui_area->position.x + margin,
+                  ui_area->position.y + margin,
+                  ui_area->size.x - 2 * margin,
+                  ui_area->size.y - 2 * margin,
+                  border_color);
 }
 
 char ui_day_names[7][10] = {
