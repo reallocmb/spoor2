@@ -2,9 +2,8 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include<stdbool.h>
 #include<raylib.h>
-#include<raygui.h>
-#include <string.h>
 
 Font font_liberation;
 
@@ -20,134 +19,93 @@ typedef struct {
     uint32_t y;
 } UIVector2;
 
-#define CHILDS_ALLOC_SIZE 5
+#define CHILDS_ALLOC_SIZE 50
 
-#define LAYOUT_TYPE_DEFAULT 0b0
-#define LAYOUT_TYPE_GRID 0b1
-#define LAYOUT_TYPE_GRID_CHILD 0b10
-#define LAYOUT_TYPE_STACK_VERTICAL 0b100
-#define LAYOUT_TYPE_STACK_VERTICAL_CHILD 0b1000
-#define LAYOUT_TYPE_STACK_HORIZONTAL 0b10000
-#define LAYOUT_TYPE_STACK_HORIZONTAL_CHILD 0b100000
+/* UI Area Flgas */
+#define UI_AREA_FLAG_PARENT 0b1
+#define UI_AREA_FLAG_CHILD 0b10
+#define UI_AREA_FLAG_LAYOUT_VERTICAL 0b100
+#define UI_AREA_FLAG_LAYOUT_HORIZONTAL 0b1000
+#define UI_AREA_FLAG_CURRENT 0b10000
 
-typedef struct {
-    uint32_t *rows;
-    uint32_t rows_count;
-    uint32_t *colums;
-    uint32_t colums_count;
-} UILayoutGrid;
-
-typedef struct {
-} UILayoutStack;
-
-/* UIContainer flags */
-#define UI_CONTAINER_FLAG_SELECTED 0b1
-
-typedef struct UIContainer {
+typedef struct UIArea {
     UIInsets margin;
     UIVector2 position;
     UIVector2 size;
-    uint32_t height;
-    uint16_t layout_type;
-    uint16_t flags;
-    union {
-        UILayoutGrid layout_grid;
-        UILayoutStack layout_stack;
-    };
-    void (*draw_func)(struct UIContainer *ui_container);
-    struct UIContainer *childs;
+    uint8_t flags;
+    void (*draw_func)(struct UIArea *ui_area);
+    struct UIArea *childs;
     uint32_t childs_count;
-} UIContainer;
+    struct UIArea *parent;
+} UIArea;
 
-UIContainer *ui_container_create(void)
+void _padding(uint32_t padding)
 {
-    UIContainer *ui_container = malloc(sizeof(*ui_container));
-    ui_container->margin = (UIInsets){ 0, 0, 0, 0};
-    ui_container->position = (UIVector2){ 0, 0 };
-    ui_container->size = (UIVector2){ 0, 0};
-    ui_container->layout_type = 0;
-    ui_container->flags = 0;
-    ui_container->draw_func = NULL;
-    ui_container->childs = NULL;
-    ui_container->childs_count = 0;
-
-    return ui_container;
+    while (padding--)
+        putchar(' ');
 }
 
-UIContainer *ui_container_child_append(UIContainer *ui_container)
+void ui_area_debug_print(UIArea *ui_area_head)
 {
-    UIContainer *ui_container_child = ui_container_create();
+    static uint32_t padding = 4;
+    _padding(padding - 4);
+    puts("{");
+    _padding(padding);
+    printf("Position: %d %d\n", ui_area_head->position.x, ui_area_head->position.y);
+    _padding(padding);
+    printf("Size: %d %d\n", ui_area_head->size.x, ui_area_head->size.y);
+    _padding(padding);
+    printf("Size: %d %d\n", ui_area_head->size.x, ui_area_head->size.y);
+    _padding(padding);
+    printf("Flags:\n");
+    _padding(padding);
+    printf("%s", (ui_area_head->flags & UI_AREA_FLAG_PARENT) ?"P, " :"");
+    printf("%s", (ui_area_head->flags & UI_AREA_FLAG_CHILD) ?"C, " :"");
+    printf("%s", (ui_area_head->flags & UI_AREA_FLAG_LAYOUT_VERTICAL) ?"LV, " :"");
+    printf("%s", (ui_area_head->flags & UI_AREA_FLAG_LAYOUT_HORIZONTAL) ?"LH, " :"");
+    printf("%s\n", (ui_area_head->flags & UI_AREA_FLAG_CURRENT) ?"Curr, " :"");
+    _padding(padding);
+    printf("Draw Func: %p\n", ui_area_head->draw_func);
 
-    if (ui_container->childs_count % CHILDS_ALLOC_SIZE == 0)
-        ui_container->childs = realloc(ui_container->childs, (ui_container->childs_count + CHILDS_ALLOC_SIZE) * sizeof(*ui_container->childs));
-
-    ui_container->childs[ui_container->childs_count] = *ui_container_child;
-    free(ui_container_child);
-
-    return &ui_container->childs[ui_container->childs_count++];
-}
-
-void ui_container_select(UIContainer *ui_container)
-{
-    ui_container->flags |= UI_CONTAINER_FLAG_SELECTED;
-}
-
-void ui_container_grid_set(UIContainer *ui_container)
-{
-}
-
-void ui_container_draw(UIContainer *ui_container)
-{
     uint32_t i;
-    for (i = 0; i < ui_container->childs_count; i++)
+    for (i = 0; i < ui_area_head->childs_count; i++)
     {
-        if (ui_container->childs[i].draw_func != NULL)
-            ui_container->childs[i].draw_func(&ui_container->childs[i]);
-        ui_container_draw(&ui_container->childs[i]);
+        padding += 4;
+        ui_area_debug_print(&ui_area_head->childs[i]);
+        padding -= 4;
     }
+
+    _padding(padding - 4);
+    puts("}");
 }
 
-void ui_container_child_resize_update(UIContainer *para)
+UIArea *ui_area_create(void)
 {
-    uint32_t i;
-    for (i = 0; i < para->childs_count; i++)
-    {
-        para->childs[i].size = para->size;
-        if (para->layout_type & LAYOUT_TYPE_STACK_VERTICAL)
-        {
-            para->childs[i].size.y = para->size.y / para->childs_count;
-            para->childs[i].position.y = para->size.y / para->childs_count * i;
-        }
+    UIArea *ui_area = malloc(sizeof(*ui_area));
+    ui_area->margin = (UIInsets){ 0, 0, 0, 0};
+    ui_area->position = (UIVector2){ 0, 0 };
+    ui_area->size = (UIVector2){ 0, 0};
+    ui_area->flags = 0;
+    ui_area->draw_func = NULL;
+    ui_area->childs = NULL;
+    ui_area->childs_count = 0;
+    ui_area->parent = NULL;
 
-        if (para->layout_type & LAYOUT_TYPE_STACK_HORIZONTAL)
-        {
-            para->childs[i].size.x = para->size.x / para->childs_count;
-            para->childs[i].position.x = para->size.x / para->childs_count * i;
-        }
-    }
+    return ui_area;
 }
 
-void ui_container_resize_update(UIContainer *para)
+void test_ui_area_draw_func(UIArea *ui_area)
 {
-    para->size = (UIVector2){ GetScreenWidth(), GetScreenHeight() };
-    uint32_t i;
-    for (i = 0; i < para->childs_count; i++)
-    {
-        para->childs[i].size = para->size;
-        if (para->layout_type & LAYOUT_TYPE_STACK_VERTICAL)
-        {
-            para->childs[i].size.y = para->size.y / para->childs_count;
-            para->childs[i].position.y = para->size.y / para->childs_count * i;
-        }
+    Color border_color = BLACK;
+    if (ui_area->flags & UI_AREA_FLAG_CURRENT)
+        border_color = VIOLET;
 
-        if (para->layout_type & LAYOUT_TYPE_STACK_HORIZONTAL)
-        {
-            para->childs[i].size.x = para->size.x / para->childs_count;
-            para->childs[i].position.x = para->size.x / para->childs_count * i;
-        }
-
-        ui_container_child_resize_update(&para->childs[i]);
-    }
+    uint32_t margin = 5;
+    DrawRectangleLines(ui_area->position.x + margin,
+                       ui_area->position.y + margin,
+                       ui_area->size.x - 2 * margin,
+                       ui_area->size.y - 2 * margin,
+                       border_color);
 }
 
 char ui_day_names[7][10] = {
@@ -162,16 +120,16 @@ char ui_day_names[7][10] = {
 
 uint32_t ui_day_names_count = 7;
 
-#if 0
-void ui_page_days_draw(UIPage *ui_page)
+#if 1
+void ui_page_days_draw(UIArea *ui_area)
 {
     uint32_t i;
     for (i = 0; i < ui_day_names_count; i++)
     {
-        uint32_t height = ui_page->height;
-        uint32_t width = ui_page->width / ui_day_names_count;
-        uint32_t x = ui_page->margin.left + i * width;
-        uint32_t y = ui_page->margin.top;
+        uint32_t height = ui_area->size.y;
+        uint32_t width = ui_area->size.x / ui_day_names_count;
+        uint32_t x = ui_area->position.x + i * width;
+        uint32_t y = ui_area->position.y;
 
         DrawLine(x + width, y, x + width, y + height, LIGHTGRAY);
 
@@ -191,7 +149,12 @@ void ui_page_days_draw(UIPage *ui_page)
                 sprintf(time, "%s%d:00", (hours < 10) ?"0" :"", hours);
 
                 DrawLine(x, y + k, x + width, y + k, BLACK);
-                DrawTextEx(font_liberation, time, (Vector2){ x + 5 + 2, y + k + 2 }, (float)font_liberation.baseSize, 2, BLACK);
+                DrawTextEx(font_liberation,
+                           time,
+                           (Vector2){ x + 5 + 2, y + k + 2 },
+                           (float)font_liberation.baseSize,
+                           2,
+                           BLACK);
             }
             else if (k % 30 == 0)
             {
@@ -204,55 +167,159 @@ void ui_page_days_draw(UIPage *ui_page)
 }
 #endif
 
-void main_page_draw_func(UIContainer *ui_container)
+void main_page_draw_func(UIArea *ui_area)
 {
-    DrawRectangleLines(ui_container->margin.left,
-            ui_container->margin.top,
-            ui_container->size.x,
-            ui_container->size.y,
-            BLACK);
+    Color border_color = BLACK;
+    if (ui_area->flags & UI_AREA_FLAG_CURRENT)
+        border_color = VIOLET;
 
-#if 0
-    ui_page_days_draw(ui_page);
+    uint32_t margin = 2;
+    DrawRectangleLines(ui_area->position.x + margin,
+                       ui_area->position.y + margin,
+                       ui_area->size.x - 2 * margin,
+                       ui_area->size.y - 2 * margin,
+                       border_color);
+
+#if 1
+    ui_page_days_draw(ui_area);
 #endif
 }
 
-void container_draw_func_test(UIContainer *ui_container)
+
+UIArea *ui_area_child_append(UIArea *ui_area_head, uint8_t flags)
 {
-    Color border_color = BLACK;
-    if (ui_container->flags & UI_CONTAINER_FLAG_SELECTED)
-        border_color = GREEN;
-    uint32_t margin = 2;
-    DrawRectangleLines(
-            ui_container->position.x + margin,
-            ui_container->position.y + margin,
-            ui_container->size.x - 2 * margin,
-            ui_container->size.y - 2 * margin,
-            border_color);
+    UIArea *ui_area_child = ui_area_create();
+    ui_area_child->flags = flags;
+    ui_area_child->draw_func = main_page_draw_func;
+    ui_area_child->draw_func = test_ui_area_draw_func;
+
+    if (ui_area_head->flags & UI_AREA_FLAG_PARENT)
+    {
+        ui_area_child->parent = ui_area_head;
+
+        if (ui_area_head->childs_count % CHILDS_ALLOC_SIZE == 0)
+            ui_area_head->childs = realloc(ui_area_head->childs,
+                                           (ui_area_head->childs_count + CHILDS_ALLOC_SIZE) * sizeof(*ui_area_head->childs));
+
+        ui_area_head->childs[ui_area_head->childs_count] = *ui_area_child;
+        ui_area_head->flags |= 0b1100 & flags; 
+        free(ui_area_child);
+
+        return &ui_area_head->childs[ui_area_head->childs_count++];
+    }
+    else
+    {
+        if ((ui_area_child->flags & 0b1100) & (ui_area_head->flags & 0b1100))
+        {
+            ui_area_child->parent = ui_area_head->parent;
+            UIArea *parent = ui_area_head->parent;
+
+            if (parent->childs_count % CHILDS_ALLOC_SIZE == 0)
+                parent->childs = realloc(parent->childs, (parent->childs_count + CHILDS_ALLOC_SIZE) * sizeof(*parent->childs));
+
+            parent->childs[parent->childs_count] = *ui_area_child;
+            free(ui_area_child);
+
+            return &parent->childs[parent->childs_count++];
+        }
+
+        UIArea backup = *ui_area_head;
+        *ui_area_head = *ui_area_create();
+
+
+        ui_area_head->flags = 0b1100 & backup.flags;
+        ui_area_head->flags |= UI_AREA_FLAG_CURRENT;
+
+        backup.flags ^= 0b1100;
+        backup.flags ^= UI_AREA_FLAG_CURRENT;
+
+
+        /* parent */
+        ui_area_head->parent = backup.parent;
+        backup.parent = ui_area_head;
+        ui_area_child->parent = ui_area_head;
+
+        if (ui_area_head->childs_count % CHILDS_ALLOC_SIZE == 0)
+            ui_area_head->childs = realloc(ui_area_head->childs, (ui_area_head->childs_count + CHILDS_ALLOC_SIZE) * sizeof(*ui_area_head->childs));
+
+        ui_area_head->childs[ui_area_head->childs_count++] = backup;
+
+        if (ui_area_head->childs_count % CHILDS_ALLOC_SIZE == 0)
+            ui_area_head->childs = realloc(ui_area_head->childs, (ui_area_head->childs_count + CHILDS_ALLOC_SIZE) * sizeof(*ui_area_head->childs));
+
+        ui_area_head->childs[ui_area_head->childs_count] = *ui_area_child;
+        ui_area_head->flags |= UI_AREA_FLAG_PARENT; 
+        free(ui_area_child);
+
+        return &ui_area_head->childs[ui_area_head->childs_count++];
+    }
+
+    return NULL;
+}
+void ui_area_current_update(UIArea **ui_area_current, UIArea *ui_area_child)
+{
+    ui_area_child->flags |= UI_AREA_FLAG_CURRENT;
+    (*ui_area_current)->flags ^= UI_AREA_FLAG_CURRENT;
+    *ui_area_current = ui_area_child;
 }
 
-void list_page_draw_func(UIContainer *ui_container)
+void ui_area_draw(UIArea *ui_area)
 {
-    DrawRectangleLines(ui_container->margin.left,
-            ui_container->margin.top,
-            ui_container->size.x,
-            ui_container->size.y,
-            BLACK);
+    if (ui_area->draw_func != NULL)
+        ui_area->draw_func(ui_area);
+
+    uint32_t i;
+    for (i = 0; i < ui_area->childs_count; i++)
+        ui_area_draw(&ui_area->childs[i]);
 }
 
-UIContainer *test(UIContainer *ptr, UIContainer **selected, uint32_t layout_type)
+void ui_area_child_resize_update(UIArea *ui_area_head)
 {
-    UIContainer *ui_container_child = ui_container_child_append(ptr);
-    ui_container_child->draw_func = container_draw_func_test;
+    uint32_t i;
+    for (i = 0; i < ui_area_head->childs_count; i++)
+    {
+        ui_area_head->childs[i].position = ui_area_head->position;
+        ui_area_head->childs[i].size = ui_area_head->size;
 
-    ptr->layout_type = layout_type;
-    (*selected)->flags = 0;
-    ui_container_child->flags |= UI_CONTAINER_FLAG_SELECTED;
-    *selected = ui_container_child;
+        if (ui_area_head->childs[i].flags & UI_AREA_FLAG_LAYOUT_VERTICAL)
+        {
+            ui_area_head->childs[i].size.y = ui_area_head->size.y / ui_area_head->childs_count;
+            ui_area_head->childs[i].position.y += ui_area_head->size.y / ui_area_head->childs_count * i;
+        }
 
-    ui_container_resize_update(ptr);
+        if (ui_area_head->childs[i].flags & UI_AREA_FLAG_LAYOUT_HORIZONTAL)
+        {
+            ui_area_head->childs[i].size.x = ui_area_head->size.x / ui_area_head->childs_count;
+            ui_area_head->childs[i].position.x += ui_area_head->size.x / ui_area_head->childs_count * i;
+        }
 
-    return ui_container_child;
+        ui_area_child_resize_update(&ui_area_head->childs[i]);
+    }
+}
+
+void ui_area_resize_update(UIArea *ui_area_head)
+{
+    ui_area_head->size = (UIVector2){ GetScreenWidth(), GetScreenHeight() };
+    uint32_t i;
+    for (i = 0; i < ui_area_head->childs_count; i++)
+    {
+        ui_area_head->childs[i].position = ui_area_head->position;
+        ui_area_head->childs[i].size = ui_area_head->size;
+
+        if (ui_area_head->childs[i].flags & UI_AREA_FLAG_LAYOUT_VERTICAL)
+        {
+            ui_area_head->childs[i].size.y = ui_area_head->size.y / ui_area_head->childs_count;
+            ui_area_head->childs[i].position.y = ui_area_head->size.y / ui_area_head->childs_count * i;
+        }
+
+        if (ui_area_head->childs[i].flags & UI_AREA_FLAG_LAYOUT_HORIZONTAL)
+        {
+            ui_area_head->childs[i].size.x = ui_area_head->size.x / ui_area_head->childs_count;
+            ui_area_head->childs[i].position.x = ui_area_head->size.x / ui_area_head->childs_count * i;
+        }
+
+        ui_area_child_resize_update(&ui_area_head->childs[i]);
+    }
 }
 
 void spoor_ui_raylib_object_show(void)
@@ -260,20 +327,14 @@ void spoor_ui_raylib_object_show(void)
     int screenWidth = 800;
     int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "layout_name");
+    InitWindow(screenWidth, screenHeight, "SPOOR BY REALLOCMB");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 
     SetTargetFPS(60);
 
-    UIContainer *ptr;
-    UIContainer *ui_container_selected;
-    UIContainer *ui_container_window = ui_container_create();
-    UIContainer *ui_container_child = ui_container_child_append(ui_container_window);
-    ui_container_child->draw_func = container_draw_func_test;
-
-    ui_container_resize_update(ui_container_window);
-    ptr = ui_container_window;
-    ui_container_selected = ui_container_window;
+    UIArea *ui_area_head = ui_area_create();
+    ui_area_head->flags = UI_AREA_FLAG_PARENT | UI_AREA_FLAG_CURRENT;
+    UIArea *ui_area_current = ui_area_head;
 
 
     /* load font */
@@ -284,63 +345,40 @@ void spoor_ui_raylib_object_show(void)
     {
         BeginDrawing();
         {
-            ClearBackground(DARKGREEN);
+            ClearBackground(BEIGE);
 
             if (IsWindowResized())
-                ui_container_resize_update(ui_container_window);
+                ui_area_resize_update(ui_area_head);
 
-            ui_container_draw(ui_container_window);
+            ui_area_draw(ui_area_head);
         }
         EndDrawing();
 
         char c = GetCharPressed();
-#if 0
-        int key = GetKeyPressed();
-#endif
         if (leader)
         {
             if (c == 'i')
             {
-                if (ptr->layout_type == LAYOUT_TYPE_STACK_HORIZONTAL)
-                    ptr = ui_container_selected;
-                ui_container_window->layout_type = LAYOUT_TYPE_STACK_VERTICAL;
-                test(ptr, &ui_container_selected, LAYOUT_TYPE_STACK_VERTICAL);
-                leader = 0;
+                UIArea *ui_area_child = ui_area_child_append(ui_area_current,
+                                                             UI_AREA_FLAG_LAYOUT_VERTICAL |
+                                                             UI_AREA_FLAG_CHILD);
+                ui_area_current_update(&ui_area_current, ui_area_child);
+                ui_area_resize_update(ui_area_head);
             }
 
             if (c == 'a')
             {
-                if (ptr->layout_type == LAYOUT_TYPE_STACK_VERTICAL)
-                    ptr = ui_container_selected;
-                ui_container_window->layout_type = LAYOUT_TYPE_STACK_HORIZONTAL;
-                test(ptr, &ui_container_selected, LAYOUT_TYPE_STACK_HORIZONTAL);
-                leader = 0;
+                UIArea *ui_area_child = ui_area_child_append(ui_area_current,
+                                     UI_AREA_FLAG_LAYOUT_HORIZONTAL |
+                                     UI_AREA_FLAG_CHILD);
+                ui_area_current_update(&ui_area_current, ui_area_child);
+                ui_area_resize_update(ui_area_head);
             }
 
-#if 0
-            if (key == KEY_S)
+            if (c == 's')
             {
-                test(ui_container_window);
-                leader = 0;
             }
-#endif
-         
         }
-
-#if 0
-        switch (key)
-        {
-            case KEY_J:
-                ui_day_names_count--;
-                break;
-            case KEY_K:
-                ui_day_names_count++;
-                break;
-            case KEY_SPACE:
-                leader = 1;
-                break;
-        }
-#endif
 
         switch (c)
         {
@@ -349,6 +387,11 @@ void spoor_ui_raylib_object_show(void)
                 break;
             case 'r':
                 ui_day_names_count++;
+                break;
+            case 'd':
+                printf("\n\n\t\tUIArea Debug Start\n---\n");
+                ui_area_debug_print(ui_area_head);
+                printf("---\n\t\tUIArea Debug End\n\n");
                 break;
             case ' ':
                 leader = 1;
