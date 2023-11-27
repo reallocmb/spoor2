@@ -357,26 +357,27 @@ void spoor_ui_raylib_object_show(void)
         char c = GetCharPressed();
         if (leader)
         {
-            if (c == 'i')
+            switch (c)
             {
-                UIArea *ui_area_child = ui_area_child_append(ui_area_current,
-                                                             UI_AREA_FLAG_LAYOUT_VERTICAL |
-                                                             UI_AREA_FLAG_CHILD);
-                ui_area_current_update(&ui_area_current, ui_area_child);
-                ui_area_resize_update(ui_area_head);
-            }
+                case 'i':
+                {
+                    UIArea *ui_area_child = ui_area_child_append(ui_area_current,
+                                                                 UI_AREA_FLAG_LAYOUT_VERTICAL |
+                                                                 UI_AREA_FLAG_CHILD);
+                    ui_area_current_update(&ui_area_current, ui_area_child);
+                    ui_area_resize_update(ui_area_head);
+                    leader = 0;
+                } break;
 
-            if (c == 'a')
-            {
-                UIArea *ui_area_child = ui_area_child_append(ui_area_current,
-                                     UI_AREA_FLAG_LAYOUT_HORIZONTAL |
-                                     UI_AREA_FLAG_CHILD);
-                ui_area_current_update(&ui_area_current, ui_area_child);
-                ui_area_resize_update(ui_area_head);
-            }
-
-            if (c == 's')
-            {
+                case 'a':
+                {
+                    UIArea *ui_area_child = ui_area_child_append(ui_area_current,
+                                                                 UI_AREA_FLAG_LAYOUT_HORIZONTAL |
+                                                                 UI_AREA_FLAG_CHILD);
+                    ui_area_current_update(&ui_area_current, ui_area_child);
+                    ui_area_resize_update(ui_area_head);
+                    leader = 0;
+                } break;
             }
         }
 
