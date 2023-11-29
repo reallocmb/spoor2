@@ -104,5 +104,11 @@ void spoor_storage_object_remove(SpoorObject *spoor_object);
 void title_format_parse(char *title, char *title_format);
 void time_format_parse_deadline(SpoorTimeSpan *spoor_time, char *time_format);
 void time_format_parse_schedule(SpoorTimeSpan *spoor_time, char *time_format);
+SpoorTime spoor_time_today_get(time_t *time);
+
+/* for unit tests */
+#ifdef EENHEID_UNIT_TESTS
+void test_spoor_time_today_set(SpoorTime *spoor_time);
+#endif
 
 #endif

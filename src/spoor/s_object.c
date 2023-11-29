@@ -6,16 +6,9 @@
 #include<string.h>
 
 /* Input [count]['d'][time] */
-#ifdef EENHEID_UNIT_TEST
-void spoor_time_date_create(char *argument,
-                            uint32_t argument_length,
-                            SpoorTime *date,
-                            SpoorTime *spoor_time_today_test)
-#else
 void spoor_time_date_create(char *argument,
                             uint32_t argument_length,
                             SpoorTime *date)
-#endif
 {
     char last_char = argument[argument_length];
     argument[argument_length] = 0;
@@ -54,11 +47,7 @@ void spoor_time_date_create(char *argument,
     if (mode == 'd')
     {
         current_time += sign * 60 * 60 * 24 * (int32_t)count;
-#ifdef EENHEID_UNIT_TEST
-        *date = *spoor_time_today_test;
-#else
-        *date = *((SpoorTime *)localtime(&current_time));
-#endif
+        *date = spoor_time_today_get(&current_time);
     }
     else
     {
