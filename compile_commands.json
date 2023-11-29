@@ -26,23 +26,6 @@
       "-Iinc",
       "-c",
       "-o",
-      "obj/my_forge/f_mem_debug.o",
-      "src/my_forge/f_mem_debug.c"
-    ],
-    "directory": "/home/mb/ws/c/spoor2",
-    "file": "/home/mb/ws/c/spoor2/src/my_forge/f_mem_debug.c",
-    "output": "/home/mb/ws/c/spoor2/obj/my_forge/f_mem_debug.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=gnu89",
-      "-g",
-      "-Iinc",
-      "-c",
-      "-o",
       "obj/redbas/redbas.o",
       "src/redbas/redbas.c"
     ],
@@ -185,5 +168,19 @@
     "directory": "/home/mb/ws/c/spoor2",
     "file": "/home/mb/ws/c/spoor2/src/spoor/s_ui_raylib.c",
     "output": "/home/mb/ws/c/spoor2/obj/spoor/s_ui_raylib.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Isrc/spoor",
+      "-Isrc/redbas",
+      "-o",
+      "bin/test",
+      "tests/test.c"
+    ],
+    "directory": "/home/mb/ws/c/spoor2",
+    "file": "/home/mb/ws/c/spoor2/tests/test.c",
+    "output": "/home/mb/ws/c/spoor2/bin/test"
   }
 ]

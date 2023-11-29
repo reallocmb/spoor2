@@ -33,10 +33,8 @@ void spoor_ui_graphapp_object_show(void);
 void spoor_ui_raylib_object_show(void);
 
 /* Debugging */
-#ifdef DEBUG
 void spoor_debug_spoor_object_print(SpoorObject *spoor_object); /* print an SpoorObject to the console */
 void spoor_debug_storage_print_all(SpoorDatabase *spoor_object);
-#endif
 
 uint32_t spoor_object_size_get(void);
 

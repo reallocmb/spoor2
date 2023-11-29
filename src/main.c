@@ -1,5 +1,3 @@
-#define DEBUG
-
 #include"spoor/spoor.h"
 
 #include<stdio.h>
@@ -11,7 +9,7 @@
 int main(int argc, char **argv)
 {
     /* change current directory to database directory */
-#if _WIN32
+#ifdef _WIN32
     char *home_directory = getenv("USERPROFILE");
 #else
     char *home_directory = getenv("HOME");
@@ -25,7 +23,7 @@ int main(int argc, char **argv)
 #else 
     strcpy(database_path, ".spoor");
 #endif
-#if _WIN32
+#ifdef _WIN32
     mkdir(database_path);
 #else
     mkdir(database_path, 0777);

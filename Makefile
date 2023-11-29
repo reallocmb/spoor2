@@ -71,5 +71,5 @@ remove:
 	sudo rm $(install_dir)/$(program)
 
 test: all
-	gcc -Isrc/spoor tests/test.c -o bin/test -leenheid
+	gcc -Isrc/spoor -Isrc/redbas tests/test.c -o bin/test obj/redbas/redbas.o -leenheid
 	./bin/test
