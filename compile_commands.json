@@ -26,6 +26,23 @@
       "-Iinc",
       "-c",
       "-o",
+      "obj/s_test.o",
+      "src/s_test.c"
+    ],
+    "directory": "/home/mb/ws/c/spoor2",
+    "file": "/home/mb/ws/c/spoor2/src/s_test.c",
+    "output": "/home/mb/ws/c/spoor2/obj/s_test.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=gnu89",
+      "-g",
+      "-Iinc",
+      "-c",
+      "-o",
       "obj/redbas/redbas.o",
       "src/redbas/redbas.c"
     ],
@@ -128,6 +145,23 @@
       "-Iinc",
       "-c",
       "-o",
+      "obj/spoor/s_time.o",
+      "src/spoor/s_time.c"
+    ],
+    "directory": "/home/mb/ws/c/spoor2",
+    "file": "/home/mb/ws/c/spoor2/src/spoor/s_time.c",
+    "output": "/home/mb/ws/c/spoor2/obj/spoor/s_time.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=gnu89",
+      "-g",
+      "-Iinc",
+      "-c",
+      "-o",
       "obj/spoor/s_ui.o",
       "src/spoor/s_ui.c"
     ],
@@ -168,19 +202,5 @@
     "directory": "/home/mb/ws/c/spoor2",
     "file": "/home/mb/ws/c/spoor2/src/spoor/s_ui_raylib.c",
     "output": "/home/mb/ws/c/spoor2/obj/spoor/s_ui_raylib.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-c",
-      "-Isrc/spoor",
-      "-Isrc/redbas",
-      "-o",
-      "bin/test",
-      "tests/test.c"
-    ],
-    "directory": "/home/mb/ws/c/spoor2",
-    "file": "/home/mb/ws/c/spoor2/tests/test.c",
-    "output": "/home/mb/ws/c/spoor2/bin/test"
   }
 ]
