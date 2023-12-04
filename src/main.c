@@ -38,11 +38,15 @@ int main(int argc, char **argv)
         spoor_ui_raylib_object_show();
     else if (strcmp(argv[1], "-v") == 0)
     {
-        printf("SPOOR VERSION: %d.%d.%d\n", SPOOR_VERSION_MAJOR, SPOOR_VERSION_MINOR, SPOOR_VERSION_PATCH);
+        printf("SPOOR VERSION: %d.%d.%d\n",
+               SPOOR_VERSION_MAJOR, 
+               SPOOR_VERSION_MINOR,
+               SPOOR_VERSION_PATCH);
     }
     else if (strcmp(argv[1], "-c") == 0)
     {
-        char *arguments = spoor_object_argv_to_command(argc - 2, argv + 2);
+        char *arguments = spoor_object_argv_to_command(argc - 2,
+                                                       argv + 2);
         printf("Arguments %s\n", arguments);
         SpoorObject *spoor_object = spoor_object_create(arguments);
         spoor_storage_save(spoor_object);

@@ -318,7 +318,7 @@ void spoor_storage_clean_up(void)
                     redbas_db_store(db_tmp, &spoor_object, sizeof(spoor_object));
                     spoor_object_index++;
                 }
-            }
+           }
 
             redbas_db_close(db_tmp);
             redbas_db_close(db);

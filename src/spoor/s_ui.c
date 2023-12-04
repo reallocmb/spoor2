@@ -271,7 +271,9 @@ void spoor_ui_object_show(void)
                     cursor_move(0, 0);
                     screen_clear();
 
+#if 0
                     spoor_storage_clean_up();
+#endif
                     break;
                 }
                 else if (strncmp(arguments + 1, "c", 1) == 0)
@@ -370,7 +372,9 @@ void spoor_ui_object_show(void)
                 cursor_move(0, 0);
                 screen_clear();
 
+#if 0
                 spoor_storage_clean_up();
+#endif
 
                 break;
             }
